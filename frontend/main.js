@@ -2,9 +2,9 @@
 // state.js to ui.js and to the 3D scene (see CONTRACT.md).
 //
 // URL parameters: game=<id>  scene=off  at=<n>|end  speed=1|4|16  reveal=1  card=<name>
-//                 skin=robots  tod=day|night  follow=1  schedule=1  sheet=open  still=1
+//                 skin=robots  tod=day|night  follow=1  sheet=open  still=1
 import { initialState, apply, toSnapshot, completeLines, liveness } from './state.js';
-import { createUI, showEmpty, clock } from './ui.js';
+import { createUI, showEmpty } from './ui.js';
 
 const q = new URLSearchParams(location.search);
 if (q.get('still') === '1') document.documentElement.classList.add('still');   // no CSS motion, for screenshots
@@ -150,7 +150,6 @@ async function run(id, base, config, index) {
       if (entry && now === 'over') entry.winner ??= events.at(-1).winner;   // the picker need not wait for the launcher
       ui.setGames(index, id, reveal);
     }
-    if (added && ui.cardName) loadTraces(ui.cardName);
     if (added || !live) render();
     if (live) setTimeout(poll, POLL_MS);
   }
@@ -288,45 +287,11 @@ async function run(id, base, config, index) {
   }
   const loop = () => { frame(); requestAnimationFrame(loop); };
 
-  // ---------- reasoning traces ----------
-
-  const traceCache = new Map();   // name -> { list, final }
-
-  function when(ts) {
-    let phase = null;
-    for (const e of events) {
-      if (e.type !== 'phase') continue;
-      if (e.ts > ts) break;
-      phase = e;
-    }
-    return phase ? `${phase.phase === 'night' ? 'Night' : 'Day'} ${phase.round} · ${clock(ts - phase.ts)}` : '';
-  }
-
-  // Fetched when a card opens; a live game refetches on reopen and as new events arrive.
-  async function loadTraces(name) {
-    const cached = traceCache.get(name);
-    if (cached?.final) return ui.setTraces(name, cached.list);
-    ui.setTraces(name, cached?.list ?? null, !cached);
-    const final = !live;
-    const text = await get(`${base}${encodeURIComponent(name)}_reasoning.jsonl`, 'text').catch(() => '');   // may be missing
-    const list = completeLines(text).flatMap((line) => {
-      try {
-        const t = JSON.parse(line);
-        const ts = Number(t.ts) || 0;
-        return [{ ts, kind: String(t.kind ?? ''), output: String(t.output ?? ''), reasoning: String(t.reasoning ?? '').trim(), usage: t.usage, when: when(ts) }];
-      } catch {
-        return [];
-      }
-    });
-    traceCache.set(name, { list, final });
-    ui.setTraces(name, list);
-  }
-
   // ---------- interface ----------
 
   const ui = createUI({
     players,
-    initial: { skin, tod, follow, voice: q.get('voice') !== '0', schedule: q.get('schedule') === '1', sheet: q.get('sheet') === 'open' },
+    initial: { skin, follow, voice: q.get('voice') !== '0', sheet: q.get('sheet') === 'open' },
     on: {
       toggle() {
         if (playing) { playing = false; following = false; hushVoice(); }   // on resume it plays on from here; LIVE jumps to the present
@@ -353,10 +318,9 @@ async function run(id, base, config, index) {
       voice(value) { voiceOn = value; if (!value) hushVoice(); },
       reveal(value) { reveal = value; pushReveal(); ui.setGames(index, id, reveal); render(); },
       skin(name) { skin = name; call('setSkin', name); },
-      tod(mode) { tod = mode; call('setTimeOfDay', mode); },
       follow(value) { follow = value; call('setFollowSpeaker', value); },
       focus(name) { call('focus', name); },
-      card(name) { call('focus', name); loadTraces(name); },
+      card(name) { call('focus', name); },
       game(next) {
         const url = new URL(location.href);
         url.search = '';

@@ -69,9 +69,7 @@ export function createUI({ players, on, initial = {} }) {
   let drawn = { count: 0, last: null, god: null };   // what the thread currently shows
   let section = null;       // the thread's current Day/Night group
   let drawnTimeline = null;
-  let cardName = null, traces = null, tracesLoading = false, traceSig = '', opener = null;
-  let showSchedule = !!initial.schedule;
-  const opened = new Set(); // dead players whose reasoning the user chose to read in town view
+  let cardName = null, opener = null;
 
   $('empty').hidden = true;
   app.hidden = false;
@@ -330,10 +328,17 @@ export function createUI({ players, on, initial = {} }) {
   const clearToast = () => fill($('toast'));
 
   // Called once per event during forward playback, after render().
+  // Day turning to night, or back: a bank of clouds drifts across the village (CSS, see .clouds).
+  function sweepClouds(night) {
+    const el = h('div', { class: 'clouds' + (night ? ' night' : ''), 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('i'));
+    $('stage').append(el);
+    setTimeout(() => el.remove(), 3600);
+  }
+
   function announce(ev) {
     const god = view.god, night = ev.phase === 'night';
     switch (ev.type) {
-      case 'phase': toast(night ? 'night' : 'day', icon(night ? 'moon' : 'sun'), phaseName(ev.phase, ev.round)); break;
+      case 'phase': sweepClouds(night); toast(night ? 'night' : 'day', icon(night ? 'moon' : 'sun'), phaseName(ev.phase, ev.round)); break;
       case 'vote_open': if (!night || god) toast(night ? 'mafia' : '', night ? 'The mafia choose their victim' : 'The town votes'); break;
       case 'eliminated': toast('death', `${ev.name} was ${ev.cause === 'night' ? 'killed in the night' : 'voted out'}`, ev.role && roleTag(String(ev.role))); break;
       case 'saved': toast('saved', god ? `${ev.name} was saved by the doctor` : 'Nobody died tonight'); break;
@@ -353,17 +358,9 @@ export function createUI({ players, on, initial = {} }) {
 
   // ---------- player card ----------
 
-  const schedBox = h('input', { type: 'checkbox', onchange: (e) => { showSchedule = e.target.checked; renderTraces(); } });
-  schedBox.checked = showSchedule;
-  const schedText = h('span');
-  const schedLabel = h('label', { class: 'check', hidden: true }, schedBox, schedText);
-  const traceBox = h('div', { class: 'trace-box' });
-  $('card-traces').append(schedLabel, traceBox);
-
   function openCard(name, { focus = true } = {}) {
     const p = byName.get(name);
     if (!p) return;
-    if (name !== cardName) { traces = null; tracesLoading = true; traceSig = ''; }
     cardName = name;
     $('card-name').textContent = name;
     $('card-model').textContent = p.model;
@@ -374,7 +371,7 @@ export function createUI({ players, on, initial = {} }) {
       if (!focus) document.activeElement?.blur();
     }
     renderCard();
-    on.card(name);   // main.js loads the traces and answers with setTraces()
+    on.card(name);
   }
 
   function closeCard() {
@@ -400,63 +397,6 @@ export function createUI({ players, on, initial = {} }) {
         h('div', null, h('dt', { text: 'Votes received' }), h('dd', { text: got.length }))),
       cast.length > 0 && h('div', { class: 'votelist' }, h('span', { class: 'votelist-label', text: 'Voted for' }), cast.map((v) => voteChip(v, v.target))),
       got.length > 0 && h('div', { class: 'votelist' }, h('span', { class: 'votelist-label', text: 'Voted by' }), got.map((v) => voteChip(v, v.voter))));
-    renderTraces();
-  }
-
-  const KIND = { message: ['message', 'Said'], vote: ['vote', 'Chose'], schedule: ['schedule', 'Decided'] };
-
-  function traceEl(t) {
-    const [label, verb] = KIND[t.kind] ?? ['call', 'Output'];
-    const tokens = Number(t.usage?.prompt_tokens ?? 0) + Number(t.usage?.completion_tokens ?? 0);
-    const cost = Number(t.usage?.cost);
-    const meta = [tokens > 0 && `${tokens.toLocaleString()} tok`, cost > 0 && `$${cost.toFixed(4)}`].filter(Boolean).join(' · ');
-    const long = t.reasoning.length > 480;
-    const body = h('p', { class: 'reason' + (t.reasoning ? '' : ' none') + (long ? ' clamp' : ''), text: t.reasoning || 'No reasoning text was exposed for this call.' });
-    const more = long && h('button', { type: 'button', class: 'more', text: 'Show all', 'aria-expanded': 'false', onclick: () => {
-      const open = !body.classList.toggle('clamp');
-      more.textContent = open ? 'Show less' : 'Show all';
-      more.setAttribute('aria-expanded', String(open));
-    } });
-    return h('li', { class: 'trace kind-' + (KIND[t.kind] ? t.kind : 'other') },
-      h('div', { class: 'trace-head' }, tag(label, 'tag-kind'), h('span', { class: 'when', text: t.when }), meta && h('span', { class: 'usage', text: meta })),
-      body, more,
-      h('div', { class: 'out' }, h('span', { class: 'out-verb', text: verb }), h('span', { class: 'out-text', text: t.output })));
-  }
-
-  // Traces up to the current playback time, newest first. Rebuilt only when what it shows changes.
-  function renderTraces() {
-    if (!cardName || !view) return;
-    const { state: s, god } = view, st = s.players[cardName];
-    const mode = god || (!st.alive && opened.has(cardName)) ? 'open' : st.alive ? 'locked' : 'gated';
-    const upto = (traces ?? []).filter((t) => t.ts <= now);
-    const sched = upto.filter((t) => t.kind === 'schedule').length;
-    const sig = [cardName, mode, tracesLoading, traces ? traces.length : -1, upto.length, showSchedule].join('|');
-    if (sig === traceSig) return;
-    traceSig = sig;
-    schedLabel.hidden = mode !== 'open' || !sched;
-    schedText.textContent = `Show scheduling decisions (${sched})`;
-    const note = (text, ...kids) => h('div', { class: 'note' }, h('p', { text }), kids);
-    if (mode === 'locked') {
-      return fill(traceBox, note(`Hidden in town view. ${cardName}’s reasoning would give away their role.`,
-        h('button', { type: 'button', class: 'btn', text: 'Reveal roles', onclick: () => on.reveal(true) })));
-    }
-    if (mode === 'gated') {
-      return fill(traceBox, note(`${cardName}’s role is public, but their reasoning can give away the roles of players who are still alive.`,
-        h('button', { type: 'button', class: 'btn', text: 'Show it anyway', onclick: () => { opened.add(cardName); renderTraces(); } })));
-    }
-    if (!traces) return fill(traceBox, note(tracesLoading ? 'Loading reasoning…' : 'Reasoning could not be loaded.'));
-    const shown = upto.filter((t) => showSchedule || t.kind !== 'schedule').reverse();
-    const empty = !traces.length ? `No reasoning was recorded for ${cardName}.`
-      : !upto.length ? 'No reasoning yet at this point in the game.'
-      : !shown.length ? 'Only scheduling decisions so far.' : null;
-    fill(traceBox, empty ? note(empty) : h('ol', { class: 'trace-list' }, shown.map(traceEl)));
-  }
-
-  function setTraces(name, list, loading = false) {
-    if (name !== cardName) return;
-    traces = list;
-    tracesLoading = loading;
-    renderTraces();
   }
 
   // ---------- stage ----------
@@ -472,15 +412,6 @@ export function createUI({ players, on, initial = {} }) {
 
   // ---------- controls ----------
 
-  // Lighting: sun or moon forces it; clicking the pressed one again lets it follow the game.
-  const todBtns = [...document.querySelectorAll('[data-tod]')];
-  const pressTod = (value) => todBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tod === value)));
-  todBtns.forEach((b) => b.addEventListener('click', () => {
-    const value = b.getAttribute('aria-pressed') === 'true' ? '' : b.dataset.tod;
-    pressTod(value);
-    on.tod(value || null);
-  }));
-  pressTod(initial.tod ?? '');
   speedBtns.forEach((b) => b.addEventListener('click', () => on.speed(+b.dataset.speed)));
 
   $('follow').setAttribute('aria-pressed', String(!!initial.follow));
@@ -554,13 +485,12 @@ export function createUI({ players, on, initial = {} }) {
     renderCard();
   }
 
-  // Every animation frame: the countdown and the traces follow playback time.
+  // Every animation frame: the countdown follows playback time.
   function tick(ts) {
     now = ts;
     if (!view) return;
     renderClock();
-    renderTraces();
   }
 
-  return { render, tick, announce, clearToast, setGames, setTraces, setScene, openCard, closeCard, get cardName() { return cardName; } };
+  return { render, tick, announce, clearToast, setGames, setScene, openCard, closeCard, get cardName() { return cardName; } };
 }
