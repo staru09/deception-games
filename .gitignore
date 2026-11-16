@@ -1,0 +1,9 @@
+.idea
+__pycache__/
+.venv/
+.env
+.env.*
+.secrets_dict.txt
+backend/autonomous_games/
+backend/mock_games/
+frontend/fixtures/games/

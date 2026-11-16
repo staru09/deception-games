@@ -1,0 +1,14 @@
+{
+  "daytime_minutes": 2,
+  "nighttime_minutes": 1,
+  "shuffle_roles": false,
+  "llm_defaults": {"seconds_between_turns": 2},
+  "players": [
+    {"role": "mafia", "model": "<openrouter-model-id>", "reasoning": {"effort": "low"}},
+    {"role": "detective", "model": "<openrouter-model-id>"},
+    {"role": "doctor", "model": "<openrouter-model-id>"},
+    {"role": "villager", "model": "<openrouter-model-id>"},
+    {"role": "villager", "model": "<openrouter-model-id>"},
+    {"role": "villager", "model": "<openrouter-model-id>"}
+  ]
+}
