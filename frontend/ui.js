@@ -328,17 +328,10 @@ export function createUI({ players, on, initial = {} }) {
   const clearToast = () => fill($('toast'));
 
   // Called once per event during forward playback, after render().
-  // Day turning to night, or back: a bank of clouds drifts across the village (CSS, see .clouds).
-  function sweepClouds(night) {
-    const el = h('div', { class: 'clouds' + (night ? ' night' : ''), 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('i'));
-    $('stage').append(el);
-    setTimeout(() => el.remove(), 3600);
-  }
-
   function announce(ev) {
     const god = view.god, night = ev.phase === 'night';
     switch (ev.type) {
-      case 'phase': sweepClouds(night); toast(night ? 'night' : 'day', icon(night ? 'moon' : 'sun'), phaseName(ev.phase, ev.round)); break;
+      case 'phase': toast(night ? 'night' : 'day', icon(night ? 'moon' : 'sun'), phaseName(ev.phase, ev.round)); break;
       case 'vote_open': if (!night || god) toast(night ? 'mafia' : '', night ? 'The mafia choose their victim' : 'The town votes'); break;
       case 'eliminated': toast('death', `${ev.name} was ${ev.cause === 'night' ? 'killed in the night' : 'voted out'}`, ev.role && roleTag(String(ev.role))); break;
       case 'saved': toast('saved', god ? `${ev.name} was saved by the doctor` : 'Nobody died tonight'); break;
