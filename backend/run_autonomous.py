@@ -43,7 +43,7 @@ import time
 from game_constants import DIRS_PREFIX, GAMES_INDEX_FILE, WHO_WINS_FILE, MAFIA_WINS_MESSAGE, \
     PLAYERS_KEY_IN_CONFIG, DAYTIME_MINUTES_KEY, NIGHTTIME_MINUTES_KEY, DEFAULT_DAYTIME_MINUTES, \
     DEFAULT_NIGHTTIME_MINUTES, OPTIONAL_CODE_NAMES, MAFIA_ROLE, DETECTIVE_ROLE, DOCTOR_ROLE, \
-    TOWN_ROLES, MODERATOR_MODEL_KEY, NIGHT_FIRST_KEY, MODERATOR_VOICE_KEY
+    TOWN_ROLES, MODERATOR_MODEL_KEY, NIGHT_FIRST_KEY, MODERATOR_VOICE_KEY, NIGHT_PACING_KEY
 from llm_players.llm_constants import LLM_CONFIG_KEY, MODEL_NAME_KEY, USE_OPENROUTER_KEY, \
     USE_MOCK_KEY, MOCK_MODEL_NAME, PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, \
     DEFAULT_PASS_TURN_TOKEN, DEFAULT_USE_TURN_TOKEN, ASYNC_TYPE_KEY, SCHEDULE_THEN_GENERATE_TYPE, \
@@ -144,6 +144,8 @@ def build_game_config(table, table_path):
             NIGHTTIME_MINUTES_KEY: table.get(NIGHTTIME_MINUTES_KEY, DEFAULT_NIGHTTIME_MINUTES),
             MODERATOR_MODEL_KEY: get_moderator_model(table),
             MODERATOR_VOICE_KEY: get_voice(table),
+            # spectators can follow the night step by step; only the night gets longer
+            NIGHT_PACING_KEY: table.get("night_pacing", True),
             NIGHT_FIRST_KEY: True,  # night 1 first: nobody votes before anyone has died
             "table_config_path": str(table_path)}
 

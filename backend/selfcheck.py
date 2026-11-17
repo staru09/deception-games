@@ -47,6 +47,7 @@ FAST = {"mock_latency_seconds": 0.05, "vote_delay_seconds": 0.2, "opening_jitter
 
 def table(*roles):
     return {"daytime_minutes": 0.1, "nighttime_minutes": 0.07, "shuffle_roles": True,
+            "night_pacing": False,  # the pauses are for spectators and would only slow the checks
             "llm_defaults": FAST, "players": [{"role": role, "model": "mock"} for role in roles]}
 
 
@@ -218,7 +219,10 @@ def check_openrouter_client():
     replies[:] = [answer("Night falls."), (200, "fake mp3 bytes")]
     assert speaker.narrate("night_start", **facts) == ("Night falls.", "narration/001.mp3")
     path, headers, body = requests[-1]
-    assert path == "/v2/speak?model=flux-hannah-en&encoding=mp3" and body == {"text": "Night falls."}
+    assert path == "/v2/speak?model=flux-hannah-en&encoding=mp3&bit_rate=48000"
+    assert body == {"text": "Night falls."}
+    (log_dir / "narration" / "length.mp3").write_bytes(bytes(9000))  # 9000 bytes at 48 kbps
+    assert moderator.clip_seconds(log_dir, "narration/length.mp3") == 1.5
     assert headers["Authorization"] == "Token selfcheck-not-a-real-key"
     assert (log_dir / "narration" / "001.mp3").read_bytes() == b'"fake mp3 bytes"'
     replies[:] = [answer("Dawn."), (500, {"err_code": "boom"})]

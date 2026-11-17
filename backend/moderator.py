@@ -29,6 +29,7 @@ DEEPGRAM_API_KEY_KEYWORD = "DEEPGRAM_API_KEY"  # read only from the environment
 # overridable for selfcheck.py, which points it at a local fake server
 DEEPGRAM_SPEAK_URL = os.environ.get("DEEPGRAM_SPEAK_URL", "https://api.deepgram.com/v2/speak")
 NARRATION_AUDIO_DIR = "narration"  # inside the game dir
+VOICE_BIT_RATE = 48000  # bits a second, asked for explicitly so a clip's length follows from its size
 REQUEST_TIMEOUT = (5, 20)  # seconds; one attempt, then the fixed line, so a game never waits long
 # Room for the reasoning that some models (Haiku 5.5 among them) do by default, which counts
 # against this limit; a line that still gets cut off is replaced by the fixed line
@@ -82,6 +83,11 @@ FALLBACK_LINES = {  # formatted with the same facts the model gets
 }
 
 
+def clip_seconds(game_dir, audio):
+    """How long a narration clip plays: a constant bit rate mp3, so its size gives its length."""
+    return (game_dir / audio).stat().st_size * 8 / VOICE_BIT_RATE
+
+
 class Moderator:
 
     def __init__(self, model, game_dir, voice=None):
@@ -108,7 +114,8 @@ class Moderator:
         path = f"{NARRATION_AUDIO_DIR}/{self.num_clips:03d}.mp3"
         try:
             response = requests.post(
-                DEEPGRAM_SPEAK_URL, params={"model": self.voice, "encoding": "mp3"},
+                DEEPGRAM_SPEAK_URL,
+                params={"model": self.voice, "encoding": "mp3", "bit_rate": VOICE_BIT_RATE},
                 headers={"Authorization": f"Token {self.deepgram_key}"}, json={"text": text},
                 timeout=REQUEST_TIMEOUT)
             response.raise_for_status()

@@ -25,6 +25,9 @@ MODERATOR_VOICE_KEY = "moderator_voice"  # a Deepgram voice that speaks its line
 # game config key: start with a Nighttime (autonomous games) instead of a Daytime (the paper's
 # human games), so the first discussion has a night's result to work with
 NIGHT_FIRST_KEY = "night_first"
+# game config key: pause between the night's steps (question, answer, next question) so that
+# spectators can follow them; the players only wait meanwhile, so it changes nothing in the game
+NIGHT_PACING_KEY = "night_pacing"
 GAME_CONFIG_FILE = "config.json"
 PLAYER_NAMES_FILE = "player_names.txt"
 REMAINING_PLAYERS_FILE = "remaining_players.txt"

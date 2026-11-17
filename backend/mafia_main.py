@@ -2,13 +2,29 @@ import json
 import random
 import re
 from game_constants import *  # incl. argparse, time, Path (from pathlib), colored (from termcolor)
-from moderator import Moderator
+from moderator import Moderator, clip_seconds
 
 
 # global variable for the game dir
 game_dir = Path()  # will be updated only if __name__ == __main__ (prevents new ones in imports)
 moderator = None  # narrates for spectators when the config names a model (see moderator.py)
 public_history = []  # what everyone knows: who is out and how, for the moderator
+night_pacing = False  # set from the config in main(); see hear() and hold()
+ANSWER_HOLD_SECONDS = 2.5  # how long a night answer stays alone on screen before the next question
+
+
+def hear(line):
+    """Night pacing: the moderator's question is heard (its clip) or read in full before its answer
+    shows. The players are only waiting for the night's vote to close, so nothing in the game changes."""
+    if night_pacing and line:
+        text, audio = line
+        time.sleep((clip_seconds(game_dir, audio) if audio else min(len(text) * 0.05, 5)) + 1)
+
+
+def hold():
+    """Night pacing: an answer stays on screen for a moment before the next question."""
+    if night_pacing:
+        time.sleep(ANSWER_HOLD_SECONDS)
 
 PHASE_EVENT_NAMES = {DAYTIME: "day", NIGHTTIME: "night"}
 
@@ -173,15 +189,21 @@ def run_night_roles(players, round_number):
     # The moderator asks the doctor, then the detective (the mafia were asked just before).
     # All of them choose at the same moment, as in the rules: the doctor never learns whom the
     # mafia picked, so the order only changes how the night is told, not how it ends.
+    # With night pacing, each question is heard before its answer shows, one step after another.
     for player in [player for player in players if player.special_role == DOCTOR_ROLE]:
-        log_narration(moderator_line("ask_doctor", players, round_number), "ask_doctor")
+        line = moderator_line("ask_doctor", players, round_number)
+        log_narration(line, "ask_doctor")
+        hear(line)
         target = players_by_name.get(player.wait_for_vote())
         if target:
             protected_name = target.name
             player.add_private_note(f"Night {round_number}: you protected {target.name}.")
             log_event("protect", doctor=player.name, target=target.name)
+            hold()
     for player in [player for player in players if player.special_role == DETECTIVE_ROLE]:
-        log_narration(moderator_line("ask_detective", players, round_number), "ask_detective")
+        line = moderator_line("ask_detective", players, round_number)
+        log_narration(line, "ask_detective")
+        hear(line)
         target = players_by_name.get(player.wait_for_vote())
         if target:
             result = "is MAFIA" if target.is_mafia else "is NOT mafia"
@@ -189,11 +211,14 @@ def run_night_roles(players, round_number):
                                     f"{target.name} {result}.")
             log_event("investigate", detective=player.name, target=target.name,
                       is_mafia=target.is_mafia)
+            hold()
     return protected_name
 
 
 def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_chat_file, players,
-                     round_number):
+                     round_number, unheard=None):
+    """unheard: a moderator line just said with no discussion after it (a night with one mafia
+    player), heard out here, once the vote is open and nobody can talk, before the questions."""
     notify_players_about_voting_time(phase_name, public_chat_file)
     log_event("vote_open", phase=PHASE_EVENT_NAMES[phase_name], round=round_number)
     # A player may have sent a message just before seeing the voting status. Relay it now:
@@ -201,9 +226,16 @@ def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_
     time.sleep(POLL_SECONDS)
     run_chat_round_between_players(voting_players, public_chat_file, phase_name)
     moment = "vote_open" if phase_name == DAYTIME else "ask_mafia"
-    log_narration(moderator_line(moment, players, round_number), moment)
+    line = moderator_line(moment, players, round_number)
+    if phase_name == NIGHTTIME:
+        hear(unheard)  # "night falls" first, then the mafia's question
+    log_narration(line, moment)
+    if phase_name == NIGHTTIME:
+        hear(line)
     voted_out_name = get_voted_out_name(optional_votes_players, public_chat_file,
                                         voting_players[:], phase_name)
+    if phase_name == NIGHTTIME:
+        hold()  # the mafia's choice, before the doctor is asked
     if phase_name == NIGHTTIME and run_night_roles(players, round_number) == voted_out_name:
         game_manager_announcement(NOBODY_ELIMINATED_MESSAGE)
         log_event("saved", name=voted_out_name)
@@ -254,7 +286,7 @@ def run_phase(players, voting_players, optional_votes_players, public_chat_file,
         game_manager_announcement(CUTTING_TO_VOTE_MESSAGE)
     print("Now voting starts...")
     voting_sub_phase(phase_name, voting_players, optional_votes_players, public_chat_file, players,
-                     round_number)
+                     round_number, None if is_discussion else opening)
 
 
 def run_nighttime(players, nighttime_minutes, round_number, opening=None):
@@ -309,12 +341,13 @@ def end_game(players, round_number):
 
 
 def main():
-    global game_dir, moderator
+    global game_dir, moderator, night_pacing
     game_dir = get_game_dir_from_argv()
     config = get_config()
     players = get_players(config)
     if config.get(MODERATOR_MODEL_KEY):
         moderator = Moderator(config[MODERATOR_MODEL_KEY], game_dir, config.get(MODERATOR_VOICE_KEY))
+    night_pacing = config.get(NIGHT_PACING_KEY, False)
     # A round is Daytime then Nighttime, or with night_first (autonomous games) Nighttime then
     # Daytime: the first discussion then has a night's result to work with, and nobody votes
     # before anyone has died.
