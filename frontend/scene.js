@@ -27,6 +27,7 @@ import { lerp, clamp } from './scene/layout.js';
 import { Actor } from './scene/actors.js';
 import { createFx, createLabel, styleElement } from './scene/fx.js';
 import { pointScale, pointPx } from './scene/particles.js';
+import { createAngel } from './scene/angel.js';
 
 const FALLBACK_COLORS = ['#f2c14e', '#4ea8de', '#b388eb', '#ff8c42', '#3ddbd9', '#f78fb3', '#a3d977', '#c9ada7'];
 const ROLES = ['mafia', 'detective', 'doctor', 'villager'];
@@ -76,6 +77,7 @@ export async function createScene(container, { players = [], onPlayerClick, asse
   const { L } = world;
   const sky = createSky(scene, L.Rh + 26);
   const fx = createFx({ scene, world, overlay: root });
+  const angel = createAngel(scene);   // the moderator, flying over the plaza while it speaks
   controls.maxDistance = L.Rh * 5;
 
   const click = name => { try { onPlayerClick?.(name); } catch (e) { console.error('[scene] onPlayerClick failed', e); } };
@@ -262,6 +264,9 @@ export async function createScene(container, { players = [], onPlayerClick, asse
         fx.breakShield(); refreshNight(false); savedToast();
         later('toast', Math.max(1.5, 4.5 / speedMul()), () => { st.saved = null; fx.toast(null); });
         break;
+      case 'narration':   // public: the moderator speaks, so the angel comes down while it does
+        angel.speak(clamp(String(ev.text ?? '').length * 0.06, 3, 10));
+        break;
       case 'game_over':
         st.winner = ev.winner === 'mafia' ? 'mafia' : 'town'; st.votes = [];
         refreshAll('walk');
@@ -272,7 +277,7 @@ export async function createScene(container, { players = [], onPlayerClick, asse
 
   function sync(snap) {
     snap = snap && typeof snap === 'object' ? snap : {};
-    timers.clear(); tweens.clear();
+    timers.clear(); tweens.clear(); angel.away();
     Object.assign(st, {
       phase: snap.phase === 'night' ? 'night' : 'day',
       votes: Array.isArray(snap.votes) ? snap.votes.filter(Boolean).map(v => ({ voter: String(v.voter), target: String(v.target) })) : [],
@@ -400,7 +405,7 @@ export async function createScene(container, { players = [], onPlayerClick, asse
     for (const [key, t] of timers) if ((t.t -= dt) <= 0) { timers.delete(key); t.fn(); }
     for (const [key, t] of tweens) { t.t += dt; const p = Math.min(1, t.t / t.dur); t.fn(p); if (p >= 1) tweens.delete(key); }
     for (const a of actors) a.update(dt, speed, a.label.speaking);
-    world.update(dt, time, k); fx.update(dt, time, mul);
+    world.update(dt, time, k); fx.update(dt, time, mul); angel.update(dt, time, mul);
     cam.idle += dt;
     if (cam.goal) {
       const e = 1 - Math.exp(-dt * 3.2), g = cam.goal;
