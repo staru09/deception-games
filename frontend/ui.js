@@ -212,7 +212,7 @@ export function createUI({ players, on, initial = {} }) {
   }
 
   function appendEntry(e, god, fresh) {
-    if (e.spoiler && !god) return false;
+    if ((e.spoiler && !god) || e.absorbed) return false;   // absorbed: a narration entry shows it (state.js)
     const night = e.phase === 'night';
     if (e.kind === 'phase' || !section) {
       section = h('section', { class: 'grp ' + (night ? 'night' : 'day') },
@@ -267,9 +267,15 @@ export function createUI({ players, on, initial = {} }) {
       case 'game_over':
         el = h('p', { class: 'sys over ' + e.winner, text: e.winner === 'mafia' ? 'Mafia wins' : 'Town wins' });
         break;
-      case 'narration':
-        el = h('p', { class: 'narration' }, h('span', { class: 'narrator', text: 'Moderator' }), e.text);
+      case 'narration': {
+        // The facts of the plain line it absorbed, compact; the saved name stays god view only.
+        const f = e.fact;
+        const fact = f?.kind === 'eliminated' ? [pname(f.name), f.role && roleTag(f.role)]
+          : f?.kind === 'saved' && god ? [pname(f.name), ' saved by the doctor'] : null;
+        el = h('p', { class: 'narration' }, h('span', { class: 'narrator', text: 'Moderator' }), e.text,
+          fact && h('span', { class: 'fact' }, fact));
         break;
+      }
       default:
         return false;
     }

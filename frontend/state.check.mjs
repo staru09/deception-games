@@ -175,4 +175,31 @@ eq(narrated.entries.at(-1), { i: atNight.count, ts: 1, kind: 'narration', phase:
   spoiler: false, text: 'Night falls.', moment: 'night_start' }, 'narration is a public entry, even at night');
 eq({ ...narrated, entries: atNight.entries, count: atNight.count }, atNight, 'narration changes no game state');
 
+// --- one voice: narration absorbs the plain line it announces ---
+// The fixture with a moderator, in the order the backend writes; a late message sits between day 1's vote_open and its narration.
+const NARRATE = { phase: (e) => e.phase + '_start', vote_open: (e) => (e.phase === 'night' ? 'ask_mafia' : 'vote_open'),
+  eliminated: () => 'eliminated', saved: () => 'saved' };
+const modded = events.flatMap((e, k) => {
+  const nar = (moment) => ({ ts: e.ts, type: 'narration', text: moment + '!', moment });
+  if (e.type === 'game_over') return [nar('game_over'), e];
+  const out = [e];
+  if (k === events.findIndex((x) => x.type === 'vote_open')) out.push({ ts: e.ts, type: 'message', name: 'Eden', text: 'late', phase: 'day' });
+  if (NARRATE[e.type]) out.push(nar(NARRATE[e.type](e)));
+  return out;
+});
+let m = s0;
+for (const ev of modded) m = apply(freeze(m), ev);
+eq({ ...m, entries: end.entries, count: end.count }, end, 'narration changes no game state over a whole game');
+eq(m.entries.filter((e) => e.absorbed).map((e) => `${e.kind} ${e.phase} ${e.round}`), ['vote_open day 1', 'eliminated day 1', 'saved night 1',
+  'vote_open day 2', 'eliminated day 2', 'eliminated night 2', 'vote_open day 3', 'eliminated day 3'], 'absorbed: day votes, deaths, the save; not the night vote');
+for (const n of m.entries.filter((e) => e.kind === 'narration')) {
+  const was = m.entries.find((e) => e.absorbed && e.i === n.fact?.i);
+  if (['vote_open', 'eliminated', 'saved'].includes(n.moment)) eq({ ...n.fact, absorbed: true }, was, `narration ${n.moment} carries the line it absorbed`);
+  else ok(!('fact' in n), `narration ${n.moment} absorbs nothing`);
+  ok(!n.spoiler, 'a narration entry is never a spoiler');
+}
+const strip = ({ i, absorbed, ...e }) => e;
+eq(m.entries.filter((e) => e.kind !== 'narration' && e.text !== 'late').map(strip), end.entries.map(strip), 'the plain entries are otherwise unchanged');
+ok(end.entries.every((e) => !('absorbed' in e) && !('fact' in e)), 'a game without narration has nothing absorbed');
+
 console.log(`state.check: ${checks} checks passed over ${events.length} fixture events`);

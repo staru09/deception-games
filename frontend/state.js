@@ -109,9 +109,22 @@ export function apply(prev, ev) {
       // Public as "nobody died"; the name is only for god view.
       add('saved', { name: ev.name });
       break;
-    case 'narration':   // the moderator, for spectators; built from public facts, so never a spoiler
-      add('narration', { text: String(ev.text ?? ''), moment: String(ev.moment ?? '') });
+    case 'narration': {   // the moderator, for spectators; built from public facts, so never a spoiler
+      // One voice: when it announces the day's vote, a death or a save, the plain line for that event
+      // (the latest one since the phase began; late messages can sit between) folds into this entry
+      // as `fact` and is marked `absorbed`, so the thread says it once.
+      const moment = String(ev.moment ?? '');
+      let j = -1;
+      if (['vote_open', 'eliminated', 'saved'].includes(moment)) {
+        for (let k = prev.entries.length - 1; k >= 0 && prev.entries[k].kind !== 'phase'; k--) {
+          const e = prev.entries[k];
+          if (e.kind === moment && !e.spoiler && !e.absorbed) { j = k; break; }
+        }
+      }
+      add('narration', { text: String(ev.text ?? ''), moment, ...(j >= 0 && { fact: prev.entries[j] }) });
+      if (j >= 0) s.entries[j] = { ...prev.entries[j], absorbed: true };
       break;
+    }
     case 'game_over':
       s.winner = ev.winner === 'mafia' ? 'mafia' : 'town';
       closeVote();

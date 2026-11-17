@@ -391,6 +391,7 @@ button.pname:hover { text-decoration: underline; }
 .sys.saved { border-color: rgba(123, 216, 143, 0.35); color: #c9f5d3; }
 .sys.over { margin: 14px 0 4px; padding: 10px; border-radius: 12px; border: 1px solid rgba(233, 196, 106, 0.5); background: rgba(233, 196, 106, 0.08); font: 700 18px var(--head); letter-spacing: 0.1em; color: var(--gold); }
 .narration { margin: 8px 0; padding: 7px 10px; border-left: 2px solid var(--gold); border-radius: 0 10px 10px 0; background: rgba(233, 196, 106, 0.06); font-size: 13px; font-style: italic; color: var(--text); }
+.narration .fact { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-style: normal; font-size: 12.5px; }
 .narrator { display: block; margin-bottom: 2px; font: 600 10.5px var(--head); font-style: normal; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
 .sys.over.mafia { border-color: rgba(240, 97, 109, 0.55); background: rgba(240, 97, 109, 0.1); color: #ff8b94; }
 
