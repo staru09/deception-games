@@ -138,20 +138,12 @@ export async function createScene(container, { players = [], onPlayerClick, asse
     a.label.setGrave(buried(a));
   }
   const votesVisible = () => st.phase === 'day' || shown();
-  function arcPoint(a) { return a.dest.clone().setY((a.after?.base ?? a.baseName) === 'sit' ? 1.7 : 2.5); }
-  function drawVote(v, instant) {
-    const from = byName.get(v.voter), to = byName.get(v.target);
-    if (!from || !to || !from.alive || !to.alive) return;
-    fx.setArc(v.voter, arcPoint(from), arcPoint(to), st.phase === 'night' ? '#ff3b3b' : from.color, instant, (from.seat.i % 3) * 0.45);
-  }
-  function refreshVotes(bump) {
+  function refreshVotes(bump) {   // the vote count on each name tag
     const counts = new Map();
     if (votesVisible()) for (const v of st.votes) counts.set(v.target, (counts.get(v.target) || 0) + 1);
     for (const a of actors) a.label.setVotes(a.alive ? counts.get(a.name) || 0 : 0, st.phase === 'night', bump);
   }
   function redrawVotes() {
-    fx.clearArcs();
-    if (votesVisible()) for (const v of st.votes) drawVote(v, true);
     refreshVotes(false);
   }
   function refreshNight(instant) {   // the private night actions: shield, spotlight, red lantern
@@ -226,8 +218,7 @@ export async function createScene(container, { players = [], onPlayerClick, asse
       case 'vote': {
         const v = { voter: String(ev.voter), target: String(ev.target) };
         st.votes = st.votes.filter(o => o.voter !== v.voter).concat(v);
-        if (votesVisible()) {
-          drawVote(v, false);
+        if (votesVisible()) {   // the voter turns to the one they vote for
           const a = byName.get(v.voter), t = byName.get(v.target);
           if (a?.alive && t) { a.face(t.dest); a.rig.gesture('agree', Math.min(speedMul(), 2.5)); }
         }

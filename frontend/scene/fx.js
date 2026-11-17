@@ -1,4 +1,4 @@
-// Overlays and effects: name labels, speech bubbles, vote arcs, shield, spotlight, toasts, confetti.
+// Overlays and effects: name labels, speech bubbles, shield, spotlight, toasts, confetti.
 // All text that comes from the game is written with textContent only.
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
@@ -135,38 +135,11 @@ function floating(cls, order) {
   return { obj, box };
 }
 
-const arcGeo = { head: new THREE.ConeGeometry(0.3, 0.75, 10).rotateX(Math.PI / 2), pulse: new THREE.SphereGeometry(0.22, 10, 8) };
 const up = new THREE.Vector3(0, 1, 0), tmp = new THREE.Vector3();
 
 export function createFx({ scene, world, overlay }) {
   const group = new THREE.Group(); scene.add(group);
-  const arcs = new Map();
   const bright = (c, k) => new THREE.Color(c).multiplyScalar(k);
-
-  // ---- vote arcs ------------------------------------------------------------------------------
-  function removeArc(key) {
-    const a = arcs.get(key); if (!a) return;
-    group.remove(a.obj); a.tube.geometry.dispose(); a.mat.dispose(); arcs.delete(key);
-  }
-  /** Glowing arc from one head to another. A second arc with the same key replaces the first. */
-  function setArc(key, from, to, color, instant, lift = 0) {
-    removeArc(key);
-    const a = from.clone(), b = to.clone(), d = a.distanceTo(b);
-    if (d < 0.5) { a.x -= 0.5; b.x += 0.5; }   // a vote for oneself: a small loop overhead
-    const mid = a.clone().lerp(b, 0.5); mid.y += (d < 0.5 ? 3.2 : 2.2 + d * 0.24) + lift;
-    const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
-    const mat = new THREE.MeshBasicMaterial({ color: bright(color, 2.1), transparent: true, opacity: 0.95, fog: false });
-    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 30, 0.1, 6), mat);
-    const head = new THREE.Mesh(arcGeo.head, mat), pulse = new THREE.Mesh(arcGeo.pulse, mat);
-    head.position.copy(b); head.lookAt(tmp.copy(b).add(curve.getTangent(1)));
-    const obj = new THREE.Group(); obj.add(tube, head, pulse); group.add(obj);
-    const arc = { obj, tube, head, pulse, mat, curve, t: instant ? 1 : 0, phase: Math.random(), total: tube.geometry.index.count };
-    arcs.set(key, arc); drawArc(arc);
-  }
-  function drawArc(a) {
-    a.tube.geometry.setDrawRange(0, Math.floor(a.total * a.t / 36) * 36);   // 6 radial quads = 36 indices per ring
-    a.head.visible = a.t >= 1;
-  }
 
   // ---- doctor's shield ------------------------------------------------------------------------
   const shield = new THREE.Group(); shield.visible = false; group.add(shield);
@@ -237,7 +210,6 @@ export function createFx({ scene, world, overlay }) {
   let flash = 0;   // 1 at a night kill, back to 0 in under a second of scene time
 
   return {
-    setArc, clearArcs() { for (const k of [...arcs.keys()]) removeArc(k); },
     setShield, breakShield, setSpotlight, burst, setConfetti,
     toast(text, kind = 'quiet') {
       toast.obj.visible = !!text; if (!text) return;
@@ -247,10 +219,6 @@ export function createFx({ scene, world, overlay }) {
     flash() { flash = 1; },
     update(dt, t, speed) {
       if (flash > 0) { flash = Math.max(0, flash - dt * 1.2 * speed); flashEl.style.opacity = flash ? (flash * flash).toFixed(3) : ''; }
-      for (const a of arcs.values()) {
-        if (a.t < 1) { a.t = Math.min(1, a.t + dt * 2.6 * speed); drawArc(a); }
-        a.pulse.position.copy(a.curve.getPoint(Math.min(a.t, (t * 0.7 + a.phase) % 1)));
-      }
       const ease = 1 - Math.exp(-dt * 6 * speed);
       if (shield.visible) {
         sh.k += (sh.goal - sh.k) * ease;
