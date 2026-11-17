@@ -124,7 +124,6 @@ class SimpleRig {
   setOpacity(k) { for (const m of this.mats) { m.transparent = k < 1; m.opacity = k; } }
 }
 
-const ringGeo = new THREE.RingGeometry(0.9, 1.16, 32).rotateX(-Math.PI / 2);
 const proxyGeo = new THREE.CylinderGeometry(1.0, 1.0, 3.4, 8).translate(0, 1.7, 0);
 
 export class Actor {
@@ -138,12 +137,10 @@ export class Actor {
     };
     this.skin = 'villagers';
     for (const [k, r] of Object.entries(this.rigs)) { r.object.visible = k === this.skin; this.group.add(r.object); }
-    this.ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: player.color, transparent: true, opacity: 0.8, depthWrite: false }));
-    this.ring.position.y = 0.05; this.group.add(this.ring);
     this.proxy = new THREE.Mesh(proxyGeo); this.proxy.visible = false; this.proxy.userData.player = player.name; this.group.add(this.proxy);
     this.anchor = new THREE.Object3D(); this.anchor.position.y = SKIN.villagers.head; this.group.add(this.anchor);   // labels hang here
     this.baseName = 'idle'; this.path = []; this.after = null; this.yaw = 0; this.spot = null;
-    this.alive = true; this.gone = false; this.fade = 0; this.onFade = null; this.pace = WALK; this.pulse = 0; this.dest = this.group.position.clone();
+    this.alive = true; this.gone = false; this.fade = 0; this.onFade = null; this.pace = WALK; this.dest = this.group.position.clone();
     this.rig.base('idle', true);
   }
   get rig() { return this.rigs[this.skin]; }
@@ -157,7 +154,7 @@ export class Actor {
   place(pos, base, yaw) {
     this.path.length = 0; this.after = null; this.fade = 0; this.onFade = null; this.gone = false;
     this.group.visible = true; this.group.position.copy(pos); this.dest.copy(pos);
-    this.yaw = yaw; this.group.rotation.y = yaw; this.ring.visible = true;
+    this.yaw = yaw; this.group.rotation.y = yaw;
     this.rig.setOpacity(1); this.setBase(base, true);
   }
   /** Walk along points, then settle into `base` facing `yaw`. No walk takes more than `limit` seconds at 1x: a long one is hurried. */
@@ -171,14 +168,12 @@ export class Actor {
   hide() { this.path.length = 0; this.after = null; this.fade = 0; this.onFade = null; this.gone = true; this.group.visible = false; }
   /** Play the death clip where the character stands and fade out. onFade is called once, as the fade begins. */
   die(onFade) {
-    this.path.length = 0; this.after = null; this.ring.visible = false;
+    this.path.length = 0; this.after = null;
     this.setBase('die'); this.fade = DIE; this.onFade = onFade;
   }
   face(point) { if (!this.path.length) this.yaw = Math.atan2(point.x - this.group.position.x, point.z - this.group.position.z); }
-  update(dt, speed, speaking) {
+  update(dt, speed) {
     if (this.gone) return;
-    this.pulse += ((speaking ? 1 : 0) - this.pulse) * (1 - Math.exp(-dt * 10));   // the ring swells while its owner talks
-    this.ring.scale.setScalar(1 + this.pulse * 0.3); this.ring.material.opacity = 0.8 + this.pulse * 0.2;
     const p = this.group.position;
     if (this.path.length) {
       let left = this.pace * speed * dt;

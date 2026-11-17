@@ -404,7 +404,7 @@ export async function createScene(container, { players = [], onPlayerClick, asse
     bloom.strength = lerp(0.1, 0.42, k); bloom.threshold = lerp(1.0, 0.82, k);
     for (const [key, t] of timers) if ((t.t -= dt) <= 0) { timers.delete(key); t.fn(); }
     for (const [key, t] of tweens) { t.t += dt; const p = Math.min(1, t.t / t.dur); t.fn(p); if (p >= 1) tweens.delete(key); }
-    for (const a of actors) a.update(dt, speed, a.label.speaking);
+    for (const a of actors) a.update(dt, speed);
     world.update(dt, time, k); fx.update(dt, time, mul); angel.update(dt, time, mul);
     cam.idle += dt;
     if (cam.goal) {
