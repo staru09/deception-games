@@ -337,6 +337,7 @@ button.pname:hover { text-decoration: underline; }
 .live.on { color: #fff; background: rgba(240, 97, 109, 0.22); border-color: rgba(240, 97, 109, 0.65); }
 .live.on .live-dot { background: var(--mafia); animation: blink 1.4s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: 0.25; } }
+.btn.blocked { animation: blink 1.2s ease-in-out infinite; }   /* the voice waits for a click (main.js) */
 
 /* ---------- chat ---------- */
 
@@ -378,7 +379,6 @@ button.pname:hover { text-decoration: underline; }
 .msg > .dot { margin-top: 6px; }
 .msg-head { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .msg-text { margin: 1px 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
-.model { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 6px; border-radius: 6px; border: 1px solid var(--line); font-size: 11px; line-height: 17px; color: var(--muted); }
 .msg.mafia { background: rgba(240, 97, 109, 0.09); box-shadow: inset 2px 0 0 var(--mafia); }
 .msg.mafia:hover { background: rgba(240, 97, 109, 0.14); }
 .msg .tag-mafia { margin-left: auto; }
@@ -419,7 +419,6 @@ button.pname:hover { text-decoration: underline; }
 .card-head { display: flex; align-items: center; gap: 12px; padding: 14px 14px 10px; }
 .card-id { flex: 1; min-width: 0; }
 .card h2 { margin: 0; font: 700 20px/1.2 var(--head); letter-spacing: 0.04em; overflow-wrap: anywhere; }
-.card-model { font: 12px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
 .card-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 14px 14px; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.2) transparent; }
 
 .facts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }

@@ -15,7 +15,6 @@ const CSS = `
 .scn-tag{display:flex;flex-direction:column;align-items:center;gap:2px;transition:opacity .3s}
 .scn-name{display:flex;align-items:center;gap:5px;padding:2px 9px 2px 7px;border-radius:999px;background:rgba(14,17,27,.8);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:12.5px;font-weight:600;line-height:1.35;box-shadow:0 1px 6px rgba(0,0,0,.35)}
 .scn-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--scn-c)}
-.scn-model{max-width:128px;overflow:hidden;text-overflow:ellipsis;padding:0 7px;border-radius:999px;background:var(--scn-c);color:#12141c;font-size:10px;font-weight:600;line-height:1.5;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .scn-role{margin-right:-4px;padding:0 6px;border-radius:999px;color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.04em;line-height:1.6;text-transform:uppercase;background:#6b7385}
 .scn-role[data-role=mafia]{background:#d93a45}
 .scn-role[data-role=detective]{background:#3b7fe6}
@@ -23,11 +22,9 @@ const CSS = `
 .scn-dead .scn-tag{opacity:.8}
 .scn-dead .scn-name{color:#c5cad6;background:rgba(30,33,44,.82)}
 .scn-dead .scn-name>span:nth-child(2){text-decoration:line-through;text-decoration-color:rgba(255,255,255,.55)}
-.scn-dead .scn-dot,.scn-dead .scn-model{filter:saturate(.35)}
-.scn-grave .scn-model{display:none}
+.scn-dead .scn-dot{filter:saturate(.35)}
 .scn-compact .scn-name{gap:4px;padding:1px 7px 1px 5px;font-size:11px}
 .scn-compact .scn-dot{width:7px;height:7px}
-.scn-compact .scn-model{display:none}
 .scn-compact .scn-role{font-size:8.5px}
 .scn-compact .scn-votes{font-size:10.5px}
 .scn-compact .scn-bubble{max-width:190px;padding:5px 9px;font-size:11.5px}
@@ -64,13 +61,13 @@ let said = 0;   // counts speech bubbles, to order them
 const el = (cls, text) => { const e = document.createElement('div'); e.className = cls; if (text !== undefined) e.textContent = text; return e; };
 const span = (cls, text) => { const e = document.createElement('span'); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
 
-/** Name label with model badge, role chip, vote count and speech bubble, anchored above a character. */
+/** Name label with role chip, vote count and speech bubble, anchored above a character. */
 export function createLabel(player) {
   const root = el('scn-label'), bubble = el('scn-bubble'), votes = el('scn-votes'), tag = el('scn-tag');
-  const name = el('scn-name'), role = span('scn-role'), model = el('scn-model', String(player.model ?? '').split('/').pop());
+  const name = el('scn-name'), role = span('scn-role');
   root.style.setProperty('--scn-c', player.color);
-  name.append(span('scn-dot'), span('', player.name), role); tag.append(name, model); root.append(bubble, votes, tag);
-  bubble.hidden = votes.hidden = role.hidden = true; model.hidden = !model.textContent;
+  name.append(span('scn-dot'), span('', player.name), role); tag.append(name); root.append(bubble, votes, tag);
+  bubble.hidden = votes.hidden = role.hidden = true;
   const obj = new CSS2DObject(root); obj.center.set(0.5, 1);
   let count = 0, size = null, lift = 0, bubbleW = 0, bubbleH = 0, shift = 0, spoken = 0;
   return {
@@ -79,8 +76,6 @@ export function createLabel(player) {
     setDead(d) { root.classList.toggle('scn-dead', d); size = null; },
     /** The view changed size or density: measure again. */
     resized() { size = null; if (!bubble.hidden) { bubbleW = bubble.offsetWidth; bubbleH = bubble.offsetHeight; } },
-    /** On a grave the label drops the model badge. */
-    setGrave(on) { root.classList.toggle('scn-grave', on); size = null; },
     /** Width and height in pixels of the name tag (with the vote count, without the bubble). Cached until the content changes. */
     get size() {
       if (size) return size;

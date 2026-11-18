@@ -36,7 +36,6 @@ function icon(name) {
   return svg;
 }
 
-const shortModel = (id) => id.slice(id.lastIndexOf('/') + 1);
 const phaseName = (phase, round) => `${phase === 'night' ? 'Night' : 'Day'} ${round}`;
 const phaseShort = (phase, round) => (phase === 'night' ? 'N' : 'D') + round;
 export const clock = (sec) => {
@@ -179,7 +178,7 @@ export function createUI({ players, on, initial = {} }) {
       c.votes.textContent = got || '';
       c.votes.hidden = !got;
       c.sub.textContent = !st.alive ? `out ${phaseShort(st.diedIn.phase, st.diedIn.round)}`   // D = voted out by day, N = killed at night
-        : mine ? `→ ${mine.target}` : role ? '' : shortModel(p.model);
+        : mine ? `→ ${mine.target}` : '';
       c.sub.style.color = mine ? colorOf(mine.target) : '';
       c.el.setAttribute('aria-label', [p.name, role, st.alive ? 'alive' : died(st).toLowerCase(),
         got && `${got} vote${got > 1 ? 's' : ''} against`, mine && `voted for ${mine.target}`].filter(Boolean).join(', '));
@@ -225,12 +224,10 @@ export function createUI({ players, on, initial = {} }) {
     let el;
     switch (e.kind) {
       case 'message': {
-        const p = byName.get(e.name);
         el = h('div', { class: 'msg' + (night ? ' mafia' : ''), onclick: () => on.focus(e.name) },
           dot(e.name),
           h('div', { class: 'msg-main' },
             h('div', { class: 'msg-head' }, pname(e.name),
-              p && h('span', { class: 'model', text: shortModel(p.model), title: p.model }),
               night && tag('mafia only', 'tag-mafia')),
             h('p', { class: 'msg-text', text: e.text })));
         break;
@@ -362,7 +359,6 @@ export function createUI({ players, on, initial = {} }) {
     if (!p) return;
     cardName = name;
     $('card-name').textContent = name;
-    $('card-model').textContent = p.model;
     $('card-dot').style.setProperty('--pc', p.color);
     if (!card.open) {
       opener = document.activeElement;
@@ -491,5 +487,11 @@ export function createUI({ players, on, initial = {} }) {
     renderClock();
   }
 
-  return { render, tick, announce, clearToast, setGames, setScene, openCard, closeCard, get cardName() { return cardName; } };
+  // The browser blocked the moderator's voice until the page is clicked: say so on the speaker button.
+  function setVoiceBlocked(on) {
+    $('voice').classList.toggle('blocked', on);
+    $('voice').title = on ? 'Click anywhere to hear the moderator' : 'Moderator voice (plays at 1× speed)';
+  }
+
+  return { render, tick, announce, clearToast, setGames, setScene, setVoiceBlocked, openCard, closeCard, get cardName() { return cardName; } };
 }

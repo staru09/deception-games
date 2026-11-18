@@ -251,12 +251,28 @@ async function run(id, base, config, index) {
   const clips = [];
   const voice = new Audio();
   voice.addEventListener('ended', () => nextClip());
+  // The browser blocks sound until the page has been clicked once, and a replay starts by itself.
+  // A blocked clip is kept: the speaker button asks for a click, and the first click plays it.
+  let voiceBlocked = false;
   function nextClip() {
     const src = clips.shift();
     if (!src) return;
     voice.src = src;
-    voice.play().catch(() => nextClip());   // the browser blocks sound until the page is clicked once
+    voice.play().catch((e) => {
+      if (e.name !== 'NotAllowedError') return nextClip();   // a missing or broken clip: skip it
+      clips.length = 0;
+      voiceBlocked = true;
+      ui.setVoiceBlocked(true);
+    });
   }
+  function unblockVoice() {
+    if (!voiceBlocked) return;
+    voiceBlocked = false;
+    ui.setVoiceBlocked(false);
+    if (voiceOn && playing && speed === 1) voice.play().catch(() => {});   // the line it missed
+  }
+  addEventListener('pointerdown', unblockVoice);
+  addEventListener('keydown', unblockVoice);
   function speak(ev) {
     if (ev.type !== 'narration' || !ev.audio || !voiceOn || speed !== 1) return;
     clips.push(base + ev.audio);

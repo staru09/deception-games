@@ -135,7 +135,6 @@ export async function createScene(container, { players = [], onPlayerClick, asse
     a.label.setRole(!a.alive || shown() ? a.role : null);
     const parent = buried(a) ? a.graveAnchor : a.anchor;   // the label moves to the grave with its owner
     if (a.label.obj.parent !== parent) parent.add(a.label.obj);
-    a.label.setGrave(buried(a));
   }
   const votesVisible = () => st.phase === 'day' || shown();
   function refreshVotes(bump) {   // the vote count on each name tag
