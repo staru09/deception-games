@@ -20,7 +20,8 @@ null turns narration off. "voice" is the Deepgram voice that speaks the moderato
 (flux-hannah-en by default, needs DEEPGRAM_API_KEY), null for a silent moderator.
 
 "variant": "misinformation" plays Mafia with unreliable information: anyone may bluff (see
-MISINFORMATION_RULES in llm_players/llm_constants.py). Left out, the game is plain Mafia.
+MISINFORMATION_RULES in llm_players/llm_constants.py), and each mafia player gets a cover
+role to claim (llm_config "cover_role"). Left out, the game is plain Mafia.
 
 Cost: on every turn a player asks its model, with the whole chat so far, whether to speak.
 "seconds_between_turns" (in "llm_defaults" or per seat) is the pause after each turn, so
@@ -51,7 +52,8 @@ from game_constants import DIRS_PREFIX, GAMES_INDEX_FILE, WHO_WINS_FILE, MAFIA_W
 from llm_players.llm_constants import LLM_CONFIG_KEY, MODEL_NAME_KEY, USE_OPENROUTER_KEY, \
     USE_MOCK_KEY, MOCK_MODEL_NAME, PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, \
     DEFAULT_PASS_TURN_TOKEN, DEFAULT_USE_TURN_TOKEN, ASYNC_TYPE_KEY, SCHEDULE_THEN_GENERATE_TYPE, \
-    WORDS_PER_SECOND_WAITING_KEY, LET_OTHERS_OPEN_KEY, OPENROUTER_API_KEY_KEYWORD
+    WORDS_PER_SECOND_WAITING_KEY, LET_OTHERS_OPEN_KEY, OPENROUTER_API_KEY_KEYWORD, \
+    COVER_ROLE_KEY, MAFIA_COVER_STORIES
 from moderator import DEFAULT_MODERATOR_MODEL, DEFAULT_VOICE, DEEPGRAM_API_KEY_KEYWORD
 from prepare_game import get_next_free_game_id, init_game
 
@@ -143,6 +145,8 @@ def build_game_config(table, table_path):
             **table.get("llm_defaults", {}),
             **{key: value for key, value in seat.items() if key not in ("role", "model")},
         }
+        if table.get("variant") == MISINFORMATION_VARIANT and seat["role"] == MAFIA_ROLE:
+            llm_config[COVER_ROLE_KEY] = random.choice(sorted(MAFIA_COVER_STORIES))  # its cover
         players.append({"name": name, "is_mafia": seat["role"] == MAFIA_ROLE, "is_llm": True,
                         "real_name": "", LLM_CONFIG_KEY: llm_config,
                         "special_role": "" if seat["role"] == MAFIA_ROLE else seat["role"]})

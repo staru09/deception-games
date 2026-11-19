@@ -166,6 +166,19 @@ MISINFORMATION_ROLE_INFO = {
                     "mafia. You may share what you learn, keep it to yourself, or bluff, "
                     "whatever helps the town most.",
 }
+# In the misinformation variant each mafia player starts with a cover: a role it can claim and
+# how to make the claim hold up. The launcher picks it (llm_config "cover_role").
+COVER_ROLE_KEY = "cover_role"
+MAFIA_COVER_STORIES = {
+    DETECTIVE_ROLE: "Your cover: if you need to claim a role, claim to be the detective. Make up "
+                    "night results that fit the game, for example that you checked players who "
+                    "are really town, and accuse one of them when it helps you.",
+    DOCTOR_ROLE: "Your cover: if you need to claim a role, claim to be the doctor. Make up "
+                 "protections that fit what happened at night, for example that you saved the "
+                 "player the town thinks the mafia went after.",
+    "villager": "Your cover: you are a plain villager. Stay low-key, back up the town's "
+                "reasoning, and steer suspicion onto others with reasons that sound fair.",
+}
 VOTE_ANSWER_FORMAT = "Reply with only one name from the list, and nothing but that name: "
 NIGHT_VOTE_TASKS = {
     DETECTIVE_ROLE: "It is Nighttime and you are the detective. Which of the following "

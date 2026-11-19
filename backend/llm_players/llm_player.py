@@ -9,7 +9,7 @@ from llm_players.llm_constants import turn_task_into_prompt, GENERAL_SYSTEM_INFO
     PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, WORDS_PER_SECOND_WAITING_KEY, \
     PASS_TURN_TOKEN_OPTIONS, USE_OPENROUTER_KEY, USE_MOCK_KEY, LET_OTHERS_OPEN_KEY, \
     VOTE_DELAY_KEY, VOTING_WAITING_TIME, ROLE_INFO, VOTE_ANSWER_FORMAT, SECONDS_BETWEEN_TURNS_KEY, \
-    MISINFORMATION_RULES, MISINFORMATION_ROLE_INFO
+    MISINFORMATION_RULES, MISINFORMATION_ROLE_INFO, COVER_ROLE_KEY, MAFIA_COVER_STORIES
 from llm_players.logger import Logger
 
 
@@ -57,6 +57,7 @@ class LLMPlayer(ABC):
             config = json.load(f)
         self.table_info = describe_table(config)
         self.is_misinformation = config.get(VARIANT_KEY) == MISINFORMATION_VARIANT
+        self.cover_role = llm_config.get(COVER_ROLE_KEY)  # mafia in the misinformation variant
         self.logger = Logger(name, game_dir)
         self.pass_turn_token = llm_config[PASS_TURN_TOKEN_KEY]
         self.use_turn_token = llm_config[USE_TURN_TOKEN_KEY]
@@ -72,9 +73,11 @@ class LLMPlayer(ABC):
         if self.is_mafia:
             mafia_names = (self.game_dir / MAFIA_NAMES_FILE).read_text().splitlines()
             other_mafia = [name for name in mafia_names if name != self.name]
-            if other_mafia:
-                return f"The other mafia members are: {', '.join(other_mafia)}.\n"
-            return "You are the only mafia member in this game.\n"
+            role_info = (f"The other mafia members are: {', '.join(other_mafia)}.\n" if other_mafia
+                         else "You are the only mafia member in this game.\n")
+            if self.is_misinformation and self.cover_role in MAFIA_COVER_STORIES:
+                role_info += MAFIA_COVER_STORIES[self.cover_role] + "\n"
+            return role_info
         role_infos = MISINFORMATION_ROLE_INFO if self.is_misinformation else ROLE_INFO
         if self.special_role in role_infos:
             role_info = role_infos[self.special_role] + "\n"
