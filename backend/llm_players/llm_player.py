@@ -4,11 +4,12 @@ from abc import ABC, abstractmethod
 from game_constants import get_role_string, GAME_START_TIME_FILE, PERSONAL_CHAT_FILE_FORMAT, \
     MESSAGE_PARSING_PATTERN, SCHEDULING_DECISION_LOG, MODEL_CHOSE_TO_USE_TURN_LOG, \
     MODEL_CHOSE_TO_PASS_TURN_LOG, GAME_CONFIG_FILE, PLAYERS_KEY_IN_CONFIG, MAFIA_NAMES_FILE, \
-    MAFIA_ROLE, PRIVATE_NOTES_FILE_FORMAT, NIGHT_FIRST_KEY
+    MAFIA_ROLE, PRIVATE_NOTES_FILE_FORMAT, NIGHT_FIRST_KEY, VARIANT_KEY, MISINFORMATION_VARIANT
 from llm_players.llm_constants import turn_task_into_prompt, GENERAL_SYSTEM_INFO, \
     PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, WORDS_PER_SECOND_WAITING_KEY, \
     PASS_TURN_TOKEN_OPTIONS, USE_OPENROUTER_KEY, USE_MOCK_KEY, LET_OTHERS_OPEN_KEY, \
-    VOTE_DELAY_KEY, VOTING_WAITING_TIME, ROLE_INFO, VOTE_ANSWER_FORMAT, SECONDS_BETWEEN_TURNS_KEY
+    VOTE_DELAY_KEY, VOTING_WAITING_TIME, ROLE_INFO, VOTE_ANSWER_FORMAT, SECONDS_BETWEEN_TURNS_KEY, \
+    MISINFORMATION_RULES, MISINFORMATION_ROLE_INFO
 from llm_players.logger import Logger
 
 
@@ -25,10 +26,8 @@ def create_llm(logger, llm_config):
     return LLMWrapper(logger, **llm_config)
 
 
-def describe_table(game_dir):
+def describe_table(config):
     """The publicly known setup, e.g. 'This game started with 6 players: 1 mafia, ...'."""
-    with open(game_dir / GAME_CONFIG_FILE) as f:
-        config = json.load(f)
     players = config[PLAYERS_KEY_IN_CONFIG]
     roles = [get_role_string(player["is_mafia"], player.get("special_role", ""))
              for player in players]
@@ -37,8 +36,11 @@ def describe_table(game_dir):
                     f"{'s' if roles.count(role) > 1 and role != MAFIA_ROLE else ''}"
                     for role in set(roles))
     first_phase = "Nighttime" if config.get(NIGHT_FIRST_KEY) else "Daytime"
-    return f"This game started with {len(players)} players: " + ", ".join(counts) + \
+    description = f"This game started with {len(players)} players: " + ", ".join(counts) + \
         f". The game starts with a {first_phase} phase."
+    if config.get(VARIANT_KEY) == MISINFORMATION_VARIANT:
+        description += " " + MISINFORMATION_RULES
+    return description
 
 
 class LLMPlayer(ABC):
@@ -51,7 +53,10 @@ class LLMPlayer(ABC):
         self.special_role = special_role
         self.role = get_role_string(is_mafia, special_role)
         self.game_dir = game_dir
-        self.table_info = describe_table(game_dir)
+        with open(game_dir / GAME_CONFIG_FILE) as f:
+            config = json.load(f)
+        self.table_info = describe_table(config)
+        self.is_misinformation = config.get(VARIANT_KEY) == MISINFORMATION_VARIANT
         self.logger = Logger(name, game_dir)
         self.pass_turn_token = llm_config[PASS_TURN_TOKEN_KEY]
         self.use_turn_token = llm_config[USE_TURN_TOKEN_KEY]
@@ -70,8 +75,9 @@ class LLMPlayer(ABC):
             if other_mafia:
                 return f"The other mafia members are: {', '.join(other_mafia)}.\n"
             return "You are the only mafia member in this game.\n"
-        if self.special_role in ROLE_INFO:
-            role_info = ROLE_INFO[self.special_role] + "\n"
+        role_infos = MISINFORMATION_ROLE_INFO if self.is_misinformation else ROLE_INFO
+        if self.special_role in role_infos:
+            role_info = role_infos[self.special_role] + "\n"
             notes = (self.game_dir / PRIVATE_NOTES_FILE_FORMAT.format(self.name)).read_text()
             if notes.strip():
                 role_info += f"Your private notes from the previous nights:\n{notes.strip()}\n"

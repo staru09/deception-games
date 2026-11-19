@@ -19,6 +19,9 @@ never see its lines. It defaults to Claude Haiku, or to "mock" when every seat i
 null turns narration off. "voice" is the Deepgram voice that speaks the moderator's lines
 (flux-hannah-en by default, needs DEEPGRAM_API_KEY), null for a silent moderator.
 
+"variant": "misinformation" plays Mafia with unreliable information: anyone may bluff (see
+MISINFORMATION_RULES in llm_players/llm_constants.py). Left out, the game is plain Mafia.
+
 Cost: on every turn a player asks its model, with the whole chat so far, whether to speak.
 "seconds_between_turns" (in "llm_defaults" or per seat) is the pause after each turn, so
 it sets how many of these calls a game makes. Without it a player asks again right away.
@@ -43,7 +46,8 @@ import time
 from game_constants import DIRS_PREFIX, GAMES_INDEX_FILE, WHO_WINS_FILE, MAFIA_WINS_MESSAGE, \
     PLAYERS_KEY_IN_CONFIG, DAYTIME_MINUTES_KEY, NIGHTTIME_MINUTES_KEY, DEFAULT_DAYTIME_MINUTES, \
     DEFAULT_NIGHTTIME_MINUTES, OPTIONAL_CODE_NAMES, MAFIA_ROLE, DETECTIVE_ROLE, DOCTOR_ROLE, \
-    TOWN_ROLES, MODERATOR_MODEL_KEY, NIGHT_FIRST_KEY, MODERATOR_VOICE_KEY, NIGHT_PACING_KEY
+    TOWN_ROLES, MODERATOR_MODEL_KEY, NIGHT_FIRST_KEY, MODERATOR_VOICE_KEY, NIGHT_PACING_KEY, \
+    VARIANT_KEY, MISINFORMATION_VARIANT
 from llm_players.llm_constants import LLM_CONFIG_KEY, MODEL_NAME_KEY, USE_OPENROUTER_KEY, \
     USE_MOCK_KEY, MOCK_MODEL_NAME, PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, \
     DEFAULT_PASS_TURN_TOKEN, DEFAULT_USE_TURN_TOKEN, ASYNC_TYPE_KEY, SCHEDULE_THEN_GENERATE_TYPE, \
@@ -89,6 +93,9 @@ def validate_table(table):
     if voice is not None and (not isinstance(voice, str) or "<" in voice):
         problems.append(f"\"voice\" must be a Deepgram voice such as \"{DEFAULT_VOICE}\", or "
                         f"null, got {voice!r}")
+    if table.get("variant") not in (None, MISINFORMATION_VARIANT):
+        problems.append(f"\"variant\" must be \"{MISINFORMATION_VARIANT}\" or left out, "
+                        f"got {table.get('variant')!r}")
     if problems:
         sys.exit("Invalid table config:\n" + "\n".join(f"  - {problem}" for problem in problems))
 
@@ -147,6 +154,7 @@ def build_game_config(table, table_path):
             # spectators can follow the night step by step; only the night gets longer
             NIGHT_PACING_KEY: table.get("night_pacing", True),
             NIGHT_FIRST_KEY: True,  # night 1 first: nobody votes before anyone has died
+            VARIANT_KEY: table.get("variant"),
             "table_config_path": str(table_path)}
 
 

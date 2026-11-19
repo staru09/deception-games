@@ -154,6 +154,18 @@ ROLE_INFO = {
                  "the mafia. You may protect yourself, but you can't protect the same player "
                  "on two consecutive nights.",
 }
+# The "misinformation" variant: the rules every player is told, and the role instructions that
+# differ from plain Mafia (the detective may share or bluff, since nothing is certain anyway).
+MISINFORMATION_RULES = ("This game uses the misinformation rules: information is unreliable, "
+                        "and anyone may lie. Town players may also bluff about their role or "
+                        "about what they learned, if they think it helps the town.")
+MISINFORMATION_ROLE_INFO = {
+    **ROLE_INFO,
+    DETECTIVE_ROLE: "As the detective, every Nighttime you secretly pick one player you are "
+                    "doubtful about, and the game manager privately tells you whether they are "
+                    "mafia. You may share what you learn, keep it to yourself, or bluff, "
+                    "whatever helps the town most.",
+}
 VOTE_ANSWER_FORMAT = "Reply with only one name from the list, and nothing but that name: "
 NIGHT_VOTE_TASKS = {
     DETECTIVE_ROLE: "It is Nighttime and you are the detective. Which of the following "

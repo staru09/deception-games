@@ -28,6 +28,10 @@ NIGHT_FIRST_KEY = "night_first"
 # game config key: pause between the night's steps (question, answer, next question) so that
 # spectators can follow them; the players only wait meanwhile, so it changes nothing in the game
 NIGHT_PACING_KEY = "night_pacing"
+# game config key: a rule variant. "misinformation" makes information unreliable (see
+# MISINFORMATION_RULES in llm_players/llm_constants.py); without it, the game is plain Mafia.
+VARIANT_KEY = "variant"
+MISINFORMATION_VARIANT = "misinformation"
 GAME_CONFIG_FILE = "config.json"
 PLAYER_NAMES_FILE = "player_names.txt"
 REMAINING_PLAYERS_FILE = "remaining_players.txt"
