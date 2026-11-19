@@ -103,6 +103,9 @@ MESSAGE_PARSING_PATTERN = r"\[(\d\d):(\d\d):(\d\d)\] ([^:]+): (.+)"  # depends o
 VOTING_MESSAGE_FORMAT = "{} voted for {}"
 VOTED_OUT_MESSAGE_FORMAT = "{} was voted out. Their role was {}"
 NIGHT_KILL_MESSAGE_FORMAT = "{} was eliminated by the mafia during the night. Their role was {}"
+# the misinformation variant never tells the players a dead player's role
+VOTED_OUT_SECRET_FORMAT = "{} was voted out."
+NIGHT_KILL_SECRET_FORMAT = "{} was eliminated by the mafia during the night."
 NOBODY_ELIMINATED_MESSAGE = "Nobody was eliminated tonight."
 REAL_NAME_CODENAME_DELIMITER = ": "  # <real name>: <codename>
 

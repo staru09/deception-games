@@ -376,6 +376,10 @@ def check_game(game_dir):
             assert event["winner"] == expected, event
             assert (MAFIA_WINS_MESSAGE in (game_dir / WHO_WINS_FILE).read_text()) == (expected == "mafia")
     assert set((game_dir / REMAINING_PLAYERS_FILE).read_text().splitlines()) == alive
+    # what players read about deaths: the role in plain Mafia, never in the misinformation variant
+    deaths = (game_dir / PUBLIC_MANAGER_CHAT_FILE).read_text()
+    if any(event["type"] == "eliminated" for event in events):
+        assert ("Their role was" in deaths) != is_misinformation, "role reveal on death is wrong"
     assert ("narration" in seen) == bool(config.get(MODERATOR_MODEL_KEY)), "moderator mismatch"
     # the chat files that players read hold exactly the messages of the log, and no night secrets
     for file_name, phase in ((PUBLIC_DAYTIME_CHAT_FILE, "day"), (PUBLIC_NIGHTTIME_CHAT_FILE, "night")):

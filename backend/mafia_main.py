@@ -302,7 +302,10 @@ def game_manager_announcement(message):
 
 def announce_voted_out_player(voted_out_player, phase_name):
     is_night = phase_name == NIGHTTIME
-    message_format = NIGHT_KILL_MESSAGE_FORMAT if is_night else VOTED_OUT_MESSAGE_FORMAT
+    if misinformation:  # the players never learn a dead player's role (spectators do, below)
+        message_format = NIGHT_KILL_SECRET_FORMAT if is_night else VOTED_OUT_SECRET_FORMAT
+    else:
+        message_format = NIGHT_KILL_MESSAGE_FORMAT if is_night else VOTED_OUT_MESSAGE_FORMAT
     game_manager_announcement(message_format.format(voted_out_player.name, voted_out_player.role))
     log_event("eliminated", name=voted_out_player.name, role=voted_out_player.role,
               cause="night" if is_night else "vote")
