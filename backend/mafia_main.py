@@ -156,7 +156,9 @@ def notify_players_about_voting_time(phase_name, public_chat_file):
     (game_dir / PHASE_STATUS_FILE).write_text(voting_phase_name)
 
 
-def get_voted_out_name(optional_votes_players, public_chat_file, voting_players, phase_name):
+def get_voted_out_name(optional_votes_players, public_chat_file, voting_players, phase_name,
+                       skip_ties=False):
+    """The most voted player. A tie is broken at random, or with skip_ties gives None."""
     votes = {player.name: 0 for player in optional_votes_players}
     while voting_players:
         voted_players = []
@@ -177,7 +179,10 @@ def get_voted_out_name(optional_votes_players, public_chat_file, voting_players,
         time.sleep(POLL_SECONDS)
     # a tie (or no valid vote at all) is decided randomly among the most voted players
     most_votes = max(votes.values())
-    return random.choice([name for name, count in votes.items() if count == most_votes])
+    most_voted = [name for name, count in votes.items() if count == most_votes]
+    if skip_ties and len(most_voted) > 1:
+        return None
+    return random.choice(most_voted)
 
 
 def run_night_roles(players, round_number):
@@ -269,8 +274,16 @@ def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_
     log_narration(line, moment)
     if phase_name == NIGHTTIME:
         hear(line)
+    # in the misinformation variant a tied day vote puts nobody out: the game moves on to night
     voted_out_name = get_voted_out_name(optional_votes_players, public_chat_file,
-                                        voting_players[:], phase_name)
+                                        voting_players[:], phase_name,
+                                        skip_ties=misinformation and phase_name == DAYTIME)
+    if voted_out_name is None:
+        game_manager_announcement(TIED_VOTE_MESSAGE)
+        log_event("tie", round=round_number)
+        public_history.append(f"day {round_number}: the vote was tied, nobody was voted out")
+        log_narration(moderator_line("tie", players, round_number), "tie")
+        return
     if phase_name == NIGHTTIME:
         hold()  # the mafia's choice, before the doctor is asked
     if phase_name == NIGHTTIME and run_night_roles(players, round_number) == voted_out_name:

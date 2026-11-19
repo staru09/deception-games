@@ -106,6 +106,7 @@ NIGHT_KILL_MESSAGE_FORMAT = "{} was eliminated by the mafia during the night. Th
 # the misinformation variant never tells the players a dead player's role
 VOTED_OUT_SECRET_FORMAT = "{} was voted out."
 NIGHT_KILL_SECRET_FORMAT = "{} was eliminated by the mafia during the night."
+TIED_VOTE_MESSAGE = "The vote is tied, so nobody is voted out today."  # misinformation variant
 NOBODY_ELIMINATED_MESSAGE = "Nobody was eliminated tonight."
 REAL_NAME_CODENAME_DELIMITER = ": "  # <real name>: <codename>
 

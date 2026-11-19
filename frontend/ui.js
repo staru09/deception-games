@@ -267,6 +267,9 @@ export function createUI({ players, on, initial = {} }) {
       case 'saved':
         el = h('p', { class: 'sys saved' }, god ? [pname(e.name), ' was saved by the doctor'] : 'Nobody died tonight');
         break;
+      case 'tie':
+        el = h('p', { class: 'sys saved', text: 'The vote is tied: nobody is voted out' });
+        break;
       case 'game_over':
         el = h('p', { class: 'sys over ' + e.winner, text: e.winner === 'mafia' ? 'Mafia wins' : 'Town wins' });
         break;
@@ -344,6 +347,7 @@ export function createUI({ players, on, initial = {} }) {
       case 'vote_open': if (!night || god) toast(night ? 'mafia' : '', night ? 'The mafia choose their victim' : 'The town votes'); break;
       case 'eliminated': toast('death', `${ev.name} was ${ev.cause === 'night' ? 'killed in the night' : 'voted out'}`, ev.role && roleTag(String(ev.role))); break;
       case 'saved': toast('saved', god ? `${ev.name} was saved by the doctor` : 'Nobody died tonight'); break;
+      case 'tie': toast('saved', 'The vote is tied: nobody is voted out'); break;
       case 'message': if (!night || god) pulse(ev.name); break;
       case 'game_over': clearToast(); break;
     }

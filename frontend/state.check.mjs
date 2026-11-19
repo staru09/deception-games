@@ -202,4 +202,12 @@ const strip = ({ i, absorbed, ...e }) => e;
 eq(m.entries.filter((e) => e.kind !== 'narration' && e.text !== 'late').map(strip), end.entries.map(strip), 'the plain entries are otherwise unchanged');
 ok(end.entries.every((e) => !('absorbed' in e) && !('fact' in e)), 'a game without narration has nothing absorbed');
 
+// --- a tied day vote (misinformation variant): nobody out, the vote closes, one voice ---
+const dayVote = upTo((e) => e.type === 'vote_open' && e.phase === 'day');
+const tied = apply(dayVote, { ts: 2, type: 'tie', round: dayVote.round });
+eq([tied.voting, tied.entries.at(-1).kind, tied.entries.at(-1).spoiler], [false, 'tie', false], 'a tie closes the vote, publicly');
+eq(alive(tied), alive(dayVote), 'a tie puts nobody out');
+const tieTold = apply(tied, { ts: 3, type: 'narration', text: 'A tie.', moment: 'tie' });
+ok(tieTold.entries.at(-2).absorbed && tieTold.entries.at(-1).fact.kind === 'tie', 'the moderator announces the tie in one voice');
+
 console.log(`state.check: ${checks} checks passed over ${events.length} fixture events`);

@@ -248,6 +248,9 @@ export async function createScene(container, { players = [], onPlayerClick, asse
         }
         break;
       }
+      case 'tie':   // nobody is out; the day's votes are over
+        st.votes = []; redrawVotes();
+        break;
       case 'saved':
         st.votes = []; redrawVotes();
         st.saved = String(ev.name ?? ''); st.shieldBroken = true;

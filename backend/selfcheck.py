@@ -320,6 +320,7 @@ def check_game(game_dir):
             assert previous.get("moment") == asked_before[kind] or previous["type"] == kind,                 f"not asked first: {event}"
         previous = event
         if kind == "phase":
+            day_votes = {}  # target -> votes, recounted to check how the day's vote ended
             assert event["phase"] == ({"day": "night", "night": "day"}.get(phase, first_phase)), event
             round_number += event["phase"] == first_phase
             assert event["round"] == round_number, event
@@ -337,6 +338,13 @@ def check_game(game_dir):
                 assert is_mafia(event["voter"]) and not is_mafia(event["target"]), event
             else:
                 assert event["voter"] != event["target"], event
+                day_votes[event["target"]] = day_votes.get(event["target"], 0) + 1
+        elif kind == "tie":
+            # a tied day vote puts nobody out, in the misinformation variant only
+            top = max(day_votes.values(), default=0)
+            assert is_misinformation and phase == "day", event
+            assert sum(count == top for count in day_votes.values()) > 1 or not day_votes, day_votes
+            seen.add("tie")
         elif kind == "investigate":
             assert phase == "night", event
             assert roles[event["detective"]] in (DETECTIVE_ROLE, FALSE_DETECTIVE_ROLE), event
@@ -360,6 +368,10 @@ def check_game(game_dir):
         elif kind == "eliminated":
             assert event["name"] in alive and event["role"] == roles[event["name"]], event
             assert event["cause"] == ("night" if phase == "night" else "vote"), event
+            if phase == "day":  # the most voted player; in the variant, the only most voted one
+                top = max(day_votes.values(), default=0)
+                assert day_votes.get(event["name"], 0) == top, (event, day_votes)
+                assert not is_misinformation or sum(count == top for count in day_votes.values()) == 1, day_votes
             if phase == "night":
                 assert event["name"] != protected and not is_mafia(event["name"]), event
                 seen.add("night kill")

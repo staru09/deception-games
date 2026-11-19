@@ -57,6 +57,8 @@ TASKS = {
                   "{name} is out of the game, {how}. Their role was {role}. Do not say whether "
                   "the game goes on: that is announced separately.",
     "saved": "Declare that nobody died last night.",
+    "tie": "The day's vote ended in a tie. Declare that nobody is voted out today, and that "
+           "night is coming.",
     "night_start": "Night falls. Send the town to sleep, and tell the mafia to wake up and choose "
                    "a victim.",
     "game_over": "The game is over. Declare the winner and reveal who the mafia were.",
@@ -78,6 +80,7 @@ FALLBACK_LINES = {  # formatted with the same facts the model gets
     "vote_open": "Time is up! Stop the discussion and cast your votes.",
     "eliminated": "{name} is out of the game, {how}. Their role: {role}.",
     "saved": "Dawn breaks, and nobody died last night.",
+    "tie": "The vote is tied, so nobody is voted out today. Night is coming.",
     "night_start": "Night falls. The town sleeps while the mafia choose a victim.",
     "game_over": "The game is over and the {winner} win. The mafia were: {mafia}.",
     "first_night": "Welcome to the village! Every night the mafia strike, the doctor protects and "

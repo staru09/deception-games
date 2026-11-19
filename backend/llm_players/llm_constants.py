@@ -163,7 +163,8 @@ MISINFORMATION_RULES = ("This game uses the misinformation rules: information is
                         "night they pick a player just like the detective, but their answers "
                         "come from the storyteller and may be false. Nobody knows who it is, not "
                         "even that player. Roles are never revealed in this game: when a player "
-                        "is out, nobody learns what their role was. Even "
+                        "is out, nobody learns what their role was. If the day's vote is tied, "
+                        "nobody is voted out and the game moves on to the night. Even "
                         "the real detective is given one false answer in the game, on a night "
                         "of the storyteller's choosing.")
 MISINFORMATION_ROLE_INFO = {

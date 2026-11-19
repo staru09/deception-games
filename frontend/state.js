@@ -112,13 +112,17 @@ export function apply(prev, ev) {
       // Public as "nobody died"; the name is only for god view.
       add('saved', { name: ev.name });
       break;
+    case 'tie':   // misinformation variant: the day's vote was tied, nobody is out
+      closeVote();
+      add('tie', {});
+      break;
     case 'narration': {   // the moderator, for spectators; built from public facts, so never a spoiler
       // One voice: when it announces the day's vote, a death or a save, the plain line for that event
       // (the latest one since the phase began; late messages can sit between) folds into this entry
       // as `fact` and is marked `absorbed`, so the thread says it once.
       const moment = String(ev.moment ?? '');
       let j = -1;
-      if (['vote_open', 'eliminated', 'saved'].includes(moment)) {
+      if (['vote_open', 'eliminated', 'saved', 'tie'].includes(moment)) {
         for (let k = prev.entries.length - 1; k >= 0 && prev.entries[k].kind !== 'phase'; k--) {
           const e = prev.entries[k];
           if (e.kind === moment && !e.spoiler && !e.absorbed) { j = k; break; }
