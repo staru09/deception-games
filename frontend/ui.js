@@ -173,7 +173,7 @@ export function createUI({ players, on, initial = {} }) {
       const got = votes.filter((v) => v.target === p.name).length;
       c.el.classList.toggle('dead', !st.alive);
       c.role.className = role ? roleClass(role) : 'role';
-      c.role.textContent = role ?? '';
+      c.role.textContent = (role ?? '').replace('_', ' ');
       c.role.hidden = !role;
       c.votes.textContent = got || '';
       c.votes.hidden = !got;
@@ -217,7 +217,7 @@ export function createUI({ players, on, initial = {} }) {
       section = h('section', { class: 'grp ' + (night ? 'night' : 'day') },
         h('h3', { class: 'grp-head' }, icon(night ? 'moon' : 'sun'), phaseName(e.phase, e.round)));
       // Same line every night, whatever happened, so it gives nothing away.
-      if (night && !god) section.append(h('p', { class: 'sys quiet', text: 'The town sleeps. What happens at night is hidden in town view.' }));
+      if (night && !god) section.append(h('p', { class: 'sys quiet', text: 'The town sleeps. The mafia\'s and the doctor\'s choices are hidden in town view.' }));
       thread.append(section);
       if (e.kind === 'phase') return true;
     }
@@ -246,11 +246,16 @@ export function createUI({ players, on, initial = {} }) {
         box.append(el);
         return true;
       }
-      case 'investigate':
-        el = h('p', { class: 'private' }, tag('private', 'tag-private'), pname(e.detective), ' investigated ', pname(e.target), ': ',
+      case 'investigate': {
+        // The exchange between the detective and the moderator, for spectators. Town view names
+        // the role the player believes it has; god view its real one, and marks a false answer.
+        const role = god ? byName.get(e.detective)?.role ?? 'detective' : 'detective';
+        el = h('p', { class: 'private' }, pname(e.detective), ' (', role.replace('_', ' '), ') asked the moderator about ',
+          pname(e.target), '. The moderator answered: ',
           h('strong', { class: e.is_mafia ? 'bad' : 'good', text: e.is_mafia ? 'mafia' : 'not mafia' }),
-          e.misled && [' ', tag('false answer', 'tag-mafia')]);
+          god && e.misled && [' ', tag('false answer', 'tag-mafia')]);
         break;
+      }
       case 'protect':
         el = h('p', { class: 'private' }, tag('private', 'tag-private'), pname(e.doctor),
           e.doctor === e.target ? ' protected themselves' : [' protected ', pname(e.target)]);

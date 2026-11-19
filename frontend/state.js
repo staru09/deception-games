@@ -6,8 +6,10 @@ export const PALETTE = ['#f2c14e', '#4ea8de', '#b388eb', '#ff8c42', '#3ddbd9', '
 export const roleOf = (p) => (p.is_mafia ? 'mafia' : p.special_role || 'villager');
 
 // CONTRACT.md's spoiler table: events that town view must not see (the mafia's night and private actions).
+// The detective's check is not one: spectators see whom it asked about and what it was told
+// (which role it really has, and whether the answer was false, stays for god view).
 export const isSpoiler = (ev, phase = ev.phase) =>
-  ev.type === 'investigate' || ev.type === 'protect'
+  ev.type === 'protect'
   || (phase === 'night' && (ev.type === 'message' || ev.type === 'vote_open' || ev.type === 'vote'));
 
 export function initialState(config) {

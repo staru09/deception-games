@@ -122,7 +122,7 @@ eq(end.players.Sage.received, [{ phase: 'night', round: 1, voter: 'Morgan' }, { 
 // --- the thread and its spoiler flags ---
 for (const e of end.entries) {
   const ev = events[e.i];
-  const want = ev.type === 'investigate' || ev.type === 'protect'
+  const want = ev.type === 'protect'
     || (['message', 'vote_open', 'vote'].includes(ev.type) && ev.phase === 'night');
   eq(e.spoiler, want, `spoiler flag of entry ${e.i} (${ev.type})`);
   eq(isSpoiler(ev), want, `isSpoiler of event ${e.i} (${ev.type})`);
@@ -130,14 +130,14 @@ for (const e of end.entries) {
 }
 eq(end.entries.length, events.length, 'one thread entry per fixture event');
 const kindsOf = (pred) => [...new Set(end.entries.filter(pred).map((e) => e.kind))].sort();
-eq(kindsOf((e) => e.spoiler), ['investigate', 'message', 'protect', 'vote', 'vote_open'], 'kinds of spoiler entries');
+eq(kindsOf((e) => e.spoiler), ['message', 'protect', 'vote', 'vote_open'], 'kinds of spoiler entries');
 ok(end.entries.filter((e) => e.phase === 'day').every((e) => !e.spoiler), 'no day entry is a spoiler');
 eq(end.entries.filter((e) => e.spoiler && e.kind === 'message').map((e) => e.name), ['Morgan', 'Ziggy', 'Morgan', 'Ziggy'], 'the mafia night chat');
 eq(end.entries.filter((e) => e.spoiler && e.kind === 'vote').length, 3, 'three night votes');
 const town = end.entries.filter((e) => !e.spoiler);   // what town view may show
 ok(!town.some((e) => e.kind === 'message' && /that was clean|sage it is|onto us/.test(e.text)), 'town view has no mafia chat');
-ok(!town.some((e) => e.kind === 'investigate' || e.kind === 'protect'), 'town view has no private actions');
-eq(town.filter((e) => e.phase === 'night').map((e) => e.kind), ['phase', 'saved', 'phase', 'eliminated'], 'what town view sees of the nights');
+ok(!town.some((e) => e.kind === 'protect'), 'town view never sees whom the doctor protected');
+eq(town.filter((e) => e.phase === 'night').map((e) => e.kind), ['phase', 'investigate', 'saved', 'phase', 'investigate', 'eliminated'], 'what town view sees of the nights: the detective\'s checks, the outcome');
 eq(end.entries.find((e) => e.kind === 'saved').spoiler, false, 'the save is public (as "nobody died")');
 eq(end.entries.filter((e) => e.kind === 'eliminated').map((e) => [e.name, e.role, e.cause]),
   [['Riley', 'villager', 'vote'], ['Morgan', 'mafia', 'vote'], ['Quinn', 'detective', 'night'], ['Ziggy', 'mafia', 'vote']], 'eliminations carry role and cause');
