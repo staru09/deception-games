@@ -29,7 +29,8 @@ Cost: on every turn a player asks its model, with the whole chat so far, whether
 "seconds_between_turns" (in "llm_defaults" or per seat) is the pause after each turn, so
 it sets how many of these calls a game makes. Without it a player asks again right away.
 
-Games are written to ./autonomous_games (or LLMAFIA_GAMES_DIR), one after the other.
+Games are written to ./autonomous_games (or LLMAFIA_GAMES_DIR), one after the other, or with
+--parallel N, N at a time (one launcher at a time: it alone hands out the game ids).
 """
 import os
 from pathlib import Path
@@ -44,7 +45,9 @@ import random
 import signal
 import subprocess
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from game_constants import DIRS_PREFIX, GAMES_INDEX_FILE, WHO_WINS_FILE, MAFIA_WINS_MESSAGE, \
     PLAYERS_KEY_IN_CONFIG, DAYTIME_MINUTES_KEY, NIGHTTIME_MINUTES_KEY, DEFAULT_DAYTIME_MINUTES, \
@@ -63,6 +66,9 @@ MINIMUM_NUM_PLAYERS = 4
 DEFAULT_TIMEOUT_MINUTES = 60
 ABORTED = "aborted"
 SECONDS_FOR_PLAYERS_TO_EXIT = 10
+STAGGER_SECONDS = 3  # between the starts of the first games of a parallel run
+LOCK = threading.RLock()  # game ids and the index are shared by games running in parallel
+STOP = threading.Event()  # set when the launcher is stopped: every game ends its processes
 
 
 def validate_table(table):
@@ -173,6 +179,11 @@ def build_game_config(table, table_path):
 
 def update_index(game_id, **fields):
     """The list of games that the viewer's game picker reads."""
+    with LOCK:  # games running in parallel all update it
+        _update_index(game_id, **fields)
+
+
+def _update_index(game_id, **fields):
     index_file = Path(DIRS_PREFIX) / GAMES_INDEX_FILE
     games = json.loads(index_file.read_text()) if index_file.exists() else []
     game = next((game for game in games if game["id"] == game_id), None)
@@ -185,13 +196,18 @@ def update_index(game_id, **fields):
     os.replace(temporary_file, index_file)
 
 
-def run_game(table, table_path, timeout_minutes):
-    game_id = get_next_free_game_id()
-    config = build_game_config(table, table_path)
-    init_game(game_id, config)
-    game_dir = Path(DIRS_PREFIX) / game_id
-    models = sorted({player[LLM_CONFIG_KEY][MODEL_NAME_KEY] for player in config[PLAYERS_KEY_IN_CONFIG]})
-    update_index(game_id, started=time.time(), models=models, winner=None)
+def run_game(table, table_path, timeout_minutes, start_delay=0):
+    # Games running in parallel start a few seconds apart, so that the providers don't get
+    # every game's first calls at the same moment.
+    if STOP.wait(start_delay):
+        return ABORTED  # the launcher was stopped before this game began
+    with LOCK:  # one game at a time picks the next free id and claims its directory
+        game_id = get_next_free_game_id()
+        config = build_game_config(table, table_path)
+        init_game(game_id, config)
+        game_dir = Path(DIRS_PREFIX) / game_id
+        models = sorted({player[LLM_CONFIG_KEY][MODEL_NAME_KEY] for player in config[PLAYERS_KEY_IN_CONFIG]})
+        update_index(game_id, started=time.time(), models=models, winner=None)
     # PYTHONUTF8: on Windows a model's first non-cp1252 character would crash its player
     environment = {**os.environ, "PYTHONUTF8": "1"}
 
@@ -215,7 +231,8 @@ def run_game(table, table_path, timeout_minutes):
                 problem = f"crashed: {', '.join(crashed)} (see console_<name>.txt in {game_dir})"
             elif time.time() > deadline:
                 problem = f"not finished after {timeout_minutes} minutes"
-            time.sleep(1)
+            elif STOP.wait(1):
+                problem = "the launcher was stopped"
         if manager.poll():
             problem = problem or f"the game manager crashed (see {game_dir}/console_manager.txt)"
         if not problem:  # the players see that the game is over and leave by themselves
@@ -238,8 +255,8 @@ def run_game(table, table_path, timeout_minutes):
 
 
 def mark_unfinished_games_aborted():
-    # Games run one at a time, so an entry without a result is left from a launcher that was
-    # killed before it could clean up. The viewer would wait for such a game forever.
+    # At start-up, an entry without a result is left from a launcher that was killed before it
+    # could clean up (run only one launcher at a time). The viewer would wait for it forever.
     index_file = Path(DIRS_PREFIX) / GAMES_INDEX_FILE
     if index_file.exists():
         for game in json.loads(index_file.read_text()):
@@ -253,6 +270,8 @@ def main():
     parser.add_argument("-n", "--games", type=int, default=1, help="number of games to play")
     parser.add_argument("--timeout-minutes", type=float, default=DEFAULT_TIMEOUT_MINUTES,
                         help="a game that takes longer is aborted")
+    parser.add_argument("-p", "--parallel", type=int, default=1,
+                        help="how many games to run at the same time (each is ~9 processes, ~165 MB)")
     args = parser.parse_args()
     table_path = Path(args.table_config).resolve()
     os.chdir(REPO_DIR)  # the game's processes find each other's files relative to the repo
@@ -265,9 +284,19 @@ def main():
     if get_voice(table) and not os.environ.get(DEEPGRAM_API_KEY_KEYWORD):
         print(f"Note: {DEEPGRAM_API_KEY_KEYWORD} is not set, so the moderator will not speak",
               flush=True)
-    signal.signal(signal.SIGTERM, lambda *_: sys.exit(1))  # so that `finally` stops the game
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(1))  # so that `finally` stops the games
     mark_unfinished_games_aborted()
-    winners = [run_game(table, table_path, args.timeout_minutes) for _ in range(args.games)]
+    parallel = max(1, min(args.parallel, args.games))
+    pool = ThreadPoolExecutor(parallel)
+    futures = [pool.submit(run_game, table, table_path, args.timeout_minutes,
+                           STAGGER_SECONDS * i if i < parallel else 0) for i in range(args.games)]
+    try:
+        winners = [future.result() for future in futures]
+    except BaseException:  # Ctrl-C or SIGTERM: every running game stops its processes
+        STOP.set()
+        pool.shutdown(wait=True, cancel_futures=True)
+        raise
+    pool.shutdown()
     print("Done: " + ", ".join(f"{winners.count(winner)} {winner}" for winner in sorted(set(winners))))
     print(f"Games are in {Path(DIRS_PREFIX).resolve()}")
 
