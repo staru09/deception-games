@@ -18,6 +18,7 @@ const CSS = `
 .scn-role{margin-right:-4px;padding:0 6px;border-radius:999px;color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.04em;line-height:1.6;text-transform:uppercase;background:#6b7385}
 .scn-role[data-role=mafia]{background:#d93a45}
 .scn-role[data-role=detective]{background:#3b7fe6}
+.scn-role[data-role=false_detective]{background:#4a5b78;outline:1px dashed #6fa8ff}
 .scn-role[data-role=doctor]{background:#149e6b}
 .scn-dead .scn-tag{opacity:.8}
 .scn-dead .scn-name{color:#c5cad6;background:rgba(30,33,44,.82)}
@@ -72,7 +73,7 @@ export function createLabel(player) {
   let count = 0, size = null, lift = 0, bubbleW = 0, bubbleH = 0, shift = 0, spoken = 0;
   return {
     obj, private: false,
-    setRole(r) { role.hidden = !r; role.textContent = r || ''; role.dataset.role = r || ''; size = null; },
+    setRole(r) { role.hidden = !r; role.textContent = (r || '').replace('_', ' '); role.dataset.role = r || ''; size = null; },
     setDead(d) { root.classList.toggle('scn-dead', d); size = null; },
     /** The view changed size or density: measure again. */
     resized() { size = null; if (!bubble.hidden) { bubbleW = bubble.offsetWidth; bubbleH = bubble.offsetHeight; } },

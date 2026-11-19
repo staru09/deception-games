@@ -14,6 +14,7 @@ the game's narration/ folder, and the viewer plays it. No voice, or a failed cal
 the line has no audio.
 """
 import os
+import random
 
 import requests
 
@@ -42,6 +43,12 @@ SYSTEM_PROMPT = ("You are the moderator of an online game of Mafia played by AI 
                  "narrate it for spectators. Answer with 1 or 2 short, vivid sentences of plain "
                  "text, without markdown. Use only the facts given, and never guess or hint who "
                  "might be mafia.")
+# for decisions (Moderator.decide), never for narration
+STORYTELLER_PROMPT = ("You are the storyteller of an online game of Mafia played by AI players, "
+                      "in a variant where information is unreliable. You know every role. When "
+                      "you decide something, keep the game confusing and close: neither team "
+                      "should be handed the win, and nothing should be obvious. Answer with "
+                      "exactly one of the options and nothing else.")
 TASKS = {
     "day_start": "A new day begins. Open it: mention any news from the night, then set the agenda "
                  "for today's discussion (what the town should try to work out).",
@@ -139,22 +146,50 @@ class Moderator:
                 prompt += ("Latest public chat:\n" + "\n".join(recent_chat[-RECENT_CHAT_LINES:])
                            + "\n")
         prompt += TASKS[moment].format(**facts)
+        text = self._complete(SYSTEM_PROMPT, prompt, moment)
+        return text or fallback
+
+    def decide(self, question, options, **secrets):
+        """
+        A storyteller decision in the misinformation variant, e.g. what a player is told at
+        night. It may use secret facts (every role), so its answer is never narrated or shown
+        to a player as the moderator's words. Returns one of `options`; with the model "mock",
+        or when the call fails or answers none of them, it picks at random.
+        """
+        if self.model == MOCK_MODEL_NAME or not self.api_key:
+            return random.choice(options)
+        prompt = "Secret facts:\n" + "".join(f"- {key.replace('_', ' ')}: {value}\n"
+                                             for key, value in secrets.items())
+        recent_chat = (self.game_dir / PUBLIC_DAYTIME_CHAT_FILE).read_text().splitlines()
+        if recent_chat:
+            prompt += "Latest public chat:\n" + "\n".join(recent_chat[-RECENT_CHAT_LINES:]) + "\n"
+        prompt += f"{question}\nReply with exactly one of: " + " / ".join(options)
+        answer = (self._complete(STORYTELLER_PROMPT, prompt, "decision") or "").lower()
+        # the longest option first, so that "not mafia" is never read as "mafia"
+        for option in sorted(options, key=len, reverse=True):
+            if option.lower() in answer:
+                return option
+        self.logger.log("storyteller answered none of the options", f"{options}: {answer}")
+        return random.choice(options)
+
+    def _complete(self, system_prompt, prompt, kind):
+        """One model call: its text, or None when it fails or is cut off. Never raises."""
         try:
             response = requests.post(
                 f"{BASE_URL}/chat/completions", timeout=REQUEST_TIMEOUT,
                 headers={"Authorization": f"Bearer {self.api_key}", "X-Title": "LLMafia"},
                 json={"model": self.model, "max_tokens": MAX_TOKENS, "usage": {"include": True},
-                      "messages": [{"role": "system", "content": SYSTEM_PROMPT},
+                      "messages": [{"role": "system", "content": system_prompt},
                                    {"role": "user", "content": prompt}]})
             data = response.json()
             choice = data["choices"][0]
             text = " ".join((choice["message"].get("content") or "").split())
         except Exception as e:  # an error status has no "choices": that lands here too
-            self.logger.log(f"moderator error ({moment})", repr(e))
-            return fallback
-        self.logger.log_call(moment, text, choice["message"].get("reasoning") or "",
+            self.logger.log(f"moderator error ({kind})", repr(e))
+            return None
+        self.logger.log_call(kind, text, choice["message"].get("reasoning") or "",
                              data.get("usage"))
         if choice.get("finish_reason") == "length":  # cut off mid-sentence
-            self.logger.log(f"moderator line cut off ({moment})", text)
-            return fallback
-        return text or fallback
+            self.logger.log(f"moderator line cut off ({kind})", text)
+            return None
+        return text

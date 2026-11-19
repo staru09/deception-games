@@ -32,6 +32,9 @@ NIGHT_PACING_KEY = "night_pacing"
 # MISINFORMATION_RULES in llm_players/llm_constants.py); without it, the game is plain Mafia.
 VARIANT_KEY = "variant"
 MISINFORMATION_VARIANT = "misinformation"
+# misinformation variant: a villager secretly told they are the detective. It acts and is
+# prompted exactly like the detective, but the storyteller chooses its answers (mafia_main.py).
+FALSE_DETECTIVE_ROLE = "false_detective"
 GAME_CONFIG_FILE = "config.json"
 PLAYER_NAMES_FILE = "player_names.txt"
 REMAINING_PLAYERS_FILE = "remaining_players.txt"

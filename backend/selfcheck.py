@@ -53,6 +53,7 @@ def table(*roles):
 
 SIX_SEATS = table("mafia", "detective", "doctor", "villager", "villager", "villager")
 SEVEN_SEATS = table("mafia", "mafia", "detective", "doctor", "villager", "villager", "villager")
+MISINFORMATION = {**SIX_SEATS, "variant": "misinformation"}
 
 
 def read_events(game_dir):
@@ -81,7 +82,10 @@ def check_table_validation():
                   table("mafia", "mafia", "villager", "doctor"),  # mafia isn't a minority
                   table("mafia", "sheriff", "villager", "villager"),
                   {**SIX_SEATS, "players": [{**seat, "model": "<openrouter-model-id>"}
-                                            for seat in SIX_SEATS["players"]]}]
+                                            for seat in SIX_SEATS["players"]]},
+                  {**SIX_SEATS, "variant": "chaos"},  # unknown variant
+                  # the misinformation variant turns a villager into the false detective
+                  {**table("mafia", "detective", "doctor", "doctor"), "variant": "misinformation"}]
     for bad_table in bad_tables:
         try:
             run_autonomous.validate_table(bad_table)
@@ -227,6 +231,16 @@ def check_openrouter_client():
     assert (log_dir / "narration" / "001.mp3").read_bytes() == b'"fake mp3 bytes"'
     replies[:] = [answer("Dawn."), (500, {"err_code": "boom"})]
     assert speaker.narrate("day_start", **facts) == ("Dawn.", None) and not replies
+    # storyteller decisions: one of the options (the longest that matches), random on failure
+    options = ["mafia", "not mafia"]
+    replies[:] = [answer("Not mafia.")]
+    assert narrator.decide("What do you tell Sage?", options, roles="Sage: mafia") == "not mafia"
+    assert "roles: Sage: mafia" in requests[-1][2]["messages"][1]["content"]
+    assert requests[-1][2]["messages"][0]["content"] == moderator.STORYTELLER_PROMPT
+    replies[:] = [answer("MAFIA")]
+    assert narrator.decide("What do you tell Sage?", options) == "mafia"
+    replies[:] = [(500, {"error": "boom"})]
+    assert narrator.decide("What do you tell Sage?", options) in options and not replies
     FAKE_SERVER.shutdown()
 
 
@@ -300,7 +314,8 @@ def check_game(game_dir):
         kind = event["type"]
         seen.add(kind)
         if kind in asked_before and config.get(MODERATOR_MODEL_KEY):
-            assert previous.get("moment") == asked_before[kind], f"not asked first: {event}"
+            # with a false detective, both detectives answer the one question
+            assert previous.get("moment") == asked_before[kind] or previous["type"] == kind,                 f"not asked first: {event}"
         previous = event
         if kind == "phase":
             assert event["phase"] == ({"day": "night", "night": "day"}.get(phase, first_phase)), event
@@ -321,9 +336,14 @@ def check_game(game_dir):
             else:
                 assert event["voter"] != event["target"], event
         elif kind == "investigate":
-            assert phase == "night" and roles[event["detective"]] == DETECTIVE_ROLE, event
+            assert phase == "night", event
+            assert roles[event["detective"]] in (DETECTIVE_ROLE, FALSE_DETECTIVE_ROLE), event
             assert event["target"] in alive - {event["detective"]}, event
-            assert event["is_mafia"] == is_mafia(event["target"]), event
+            # an answer is false exactly when it's flagged misled, and only the false
+            # detective's can be (its answers come from the storyteller)
+            assert (event["is_mafia"] != is_mafia(event["target"])) == event.get("misled", False), event
+            assert not event.get("misled") or roles[event["detective"]] == FALSE_DETECTIVE_ROLE, event
+            seen.add("false detective" if roles[event["detective"]] == FALSE_DETECTIVE_ROLE else "detective")
         elif kind == "protect":
             assert phase == "night" and roles[event["doctor"]] == DOCTOR_ROLE, event
             assert event["target"] in alive, event
@@ -360,7 +380,7 @@ def check_game(game_dir):
     night_chat = (game_dir / PUBLIC_NIGHTTIME_CHAT_FILE).read_text()
     for name, role in roles.items():
         assert role == MAFIA_ROLE or f"{name} voted" not in night_chat, f"{name}'s night choice leaked"
-        if role in NIGHT_ROLES:
+        if role in (*NIGHT_ROLES, FALSE_DETECTIVE_ROLE):
             notes = (game_dir / PRIVATE_NOTES_FILE_FORMAT.format(name)).read_text().splitlines()
             actions = [e for e in events if name in (e.get("detective"), e.get("doctor"))]
             assert len(notes) == len(actions), f"{name}: {len(notes)} notes, {len(actions)} actions"
@@ -376,13 +396,14 @@ def check_game(game_dir):
 
 def check_whole_games(num_games):
     seen = set()
-    for name, mock_table in (("six_seats", SIX_SEATS), ("seven_seats", SEVEN_SEATS)):
+    tables = (("six_seats", SIX_SEATS), ("seven_seats", SEVEN_SEATS), ("misinformation", MISINFORMATION))
+    for name, mock_table in tables:
         table_path = TEMPORARY_DIR / f"{name}.json"
         table_path.write_text(json.dumps(mock_table))
         subprocess.run([sys.executable, "run_autonomous.py", str(table_path), "--games",
                         str(num_games), "--timeout-minutes", "5"], check=True)
     index = json.loads((Path(DIRS_PREFIX) / GAMES_INDEX_FILE).read_text())
-    assert len(index) == 2 * num_games, index
+    assert len(index) == len(tables) * num_games, index
     for game in index:
         assert game["winner"] in ("mafia", "town"), f"game {game['id']}: {game['winner']}"
         seen |= check_game(Path(DIRS_PREFIX) / game["id"])
@@ -399,7 +420,7 @@ def main():
         check()
         print(f"ok  {check.__name__}", flush=True)
     seen = check_whole_games(args.games)
-    print(f"ok  check_whole_games ({2 * args.games} games), seen: {', '.join(sorted(seen))}")
+    print(f"ok  check_whole_games ({args.games} per table), seen: {', '.join(sorted(seen))}")
     missing = {"day message", "night message", "investigate", "protect", "saved", "night kill"} - seen
     if missing:  # the mock players move at random, so this is about coverage, not correctness
         print(f"note: never happened in these games: {', '.join(sorted(missing))} (try a higher --games)")

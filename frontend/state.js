@@ -91,7 +91,8 @@ export function apply(prev, ev) {
     }
     case 'investigate':
       s.investigate = { detective: ev.detective, target: ev.target, is_mafia: !!ev.is_mafia };
-      add('investigate', s.investigate);
+      // misled: the answer was false (misinformation variant); the chat marks it in god view only
+      add('investigate', { ...s.investigate, misled: !!ev.misled });
       break;
     case 'protect':
       s.protect = { doctor: ev.doctor, target: ev.target };

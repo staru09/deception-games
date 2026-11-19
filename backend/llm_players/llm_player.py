@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 from game_constants import get_role_string, GAME_START_TIME_FILE, PERSONAL_CHAT_FILE_FORMAT, \
     MESSAGE_PARSING_PATTERN, SCHEDULING_DECISION_LOG, MODEL_CHOSE_TO_USE_TURN_LOG, \
     MODEL_CHOSE_TO_PASS_TURN_LOG, GAME_CONFIG_FILE, PLAYERS_KEY_IN_CONFIG, MAFIA_NAMES_FILE, \
-    MAFIA_ROLE, PRIVATE_NOTES_FILE_FORMAT, NIGHT_FIRST_KEY, VARIANT_KEY, MISINFORMATION_VARIANT
+    MAFIA_ROLE, PRIVATE_NOTES_FILE_FORMAT, NIGHT_FIRST_KEY, VARIANT_KEY, MISINFORMATION_VARIANT, \
+    FALSE_DETECTIVE_ROLE, DETECTIVE_ROLE, VILLAGER_ROLE
 from llm_players.llm_constants import turn_task_into_prompt, GENERAL_SYSTEM_INFO, \
     PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, WORDS_PER_SECOND_WAITING_KEY, \
     PASS_TURN_TOKEN_OPTIONS, USE_OPENROUTER_KEY, USE_MOCK_KEY, LET_OTHERS_OPEN_KEY, \
@@ -29,8 +30,9 @@ def create_llm(logger, llm_config):
 def describe_table(config):
     """The publicly known setup, e.g. 'This game started with 6 players: 1 mafia, ...'."""
     players = config[PLAYERS_KEY_IN_CONFIG]
+    # the false detective is announced as what everyone thinks it is: a villager
     roles = [get_role_string(player["is_mafia"], player.get("special_role", ""))
-             for player in players]
+             .replace(FALSE_DETECTIVE_ROLE, VILLAGER_ROLE) for player in players]
     # sorted, so the text is the same for every seat order
     counts = sorted(f"{roles.count(role)} {role}"
                     f"{'s' if roles.count(role) > 1 and role != MAFIA_ROLE else ''}"
@@ -50,7 +52,10 @@ class LLMPlayer(ABC):
     def __init__(self, name, is_mafia, llm_config, game_dir, special_role="", **kwargs):
         self.name = name
         self.is_mafia = is_mafia
-        self.special_role = special_role
+        # the false detective believes, plays and is prompted as the detective; only the game
+        # manager knows the truth (it chooses this player's answers)
+        self.special_role = DETECTIVE_ROLE if special_role == FALSE_DETECTIVE_ROLE else special_role
+        special_role = self.special_role
         self.role = get_role_string(is_mafia, special_role)
         self.game_dir = game_dir
         with open(game_dir / GAME_CONFIG_FILE) as f:

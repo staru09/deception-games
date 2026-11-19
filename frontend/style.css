@@ -270,6 +270,7 @@ button.pname:hover { text-decoration: underline; }
 .role-mafia { color: #ff9aa2; border-color: rgba(240, 97, 109, 0.55); background: rgba(240, 97, 109, 0.13); }
 .role-detective { color: #9bd0ff; border-color: rgba(108, 182, 255, 0.5); background: rgba(108, 182, 255, 0.12); }
 .role-doctor { color: #9be8ad; border-color: rgba(123, 216, 143, 0.5); background: rgba(123, 216, 143, 0.11); }
+.role-false_detective { color: #9bd0ff; border: 1px dashed rgba(108, 182, 255, 0.6); background: none; }   /* a villager who believed it was the detective */
 .role-hidden { border-style: dashed; color: var(--muted); }
 .role-hidden .ic { width: 11px; height: 11px; }
 .tag-mafia { color: #ff9aa2; border-color: rgba(240, 97, 109, 0.5); }

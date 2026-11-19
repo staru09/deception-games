@@ -200,19 +200,45 @@ def run_night_roles(players, round_number):
             player.add_private_note(f"Night {round_number}: you protected {target.name}.")
             log_event("protect", doctor=player.name, target=target.name)
             hold()
-    for player in [player for player in players if player.special_role == DETECTIVE_ROLE]:
+    # The detective, and in the misinformation variant the false detective too: both believe
+    # they are the detective, so the moderator asks once and both answer.
+    investigators = [player for player in players
+                     if player.special_role in (DETECTIVE_ROLE, FALSE_DETECTIVE_ROLE)]
+    if investigators:
         line = moderator_line("ask_detective", players, round_number)
         log_narration(line, "ask_detective")
         hear(line)
+    for player in investigators:
         target = players_by_name.get(player.wait_for_vote())
         if target:
-            result = "is MAFIA" if target.is_mafia else "is NOT mafia"
+            told = target.is_mafia
+            if player.special_role == FALSE_DETECTIVE_ROLE:  # the storyteller chooses its answer
+                truth = "mafia" if target.is_mafia else "not mafia"
+                told = storyteller_choice(
+                    f"{player.name} is the false detective: a villager who believes they are the "
+                    f"detective. Tonight they asked about {target.name}, who is really {truth}. "
+                    f"What do you tell {player.name}?", ["mafia", "not mafia"],
+                    players, round_number) == "mafia"
+            result = "is MAFIA" if told else "is NOT mafia"
             player.add_private_note(f"Night {round_number}: you investigated {target.name} - "
                                     f"{target.name} {result}.")
-            log_event("investigate", detective=player.name, target=target.name,
-                      is_mafia=target.is_mafia)
+            # misled: the answer was false (spectators see it in god view only)
+            log_event("investigate", detective=player.name, target=target.name, is_mafia=told,
+                      **({"misled": True} if told != target.is_mafia else {}))
             hold()
     return protected_name
+
+
+def storyteller_choice(question, options, players, round_number):
+    """
+    A storyteller decision (misinformation variant): the moderator's model when there is one,
+    otherwise a random choice. It knows every role, so it is never narrated.
+    """
+    if moderator is None:
+        return random.choice(options)
+    return moderator.decide(question, options, round=round_number,
+                            living_players_and_roles="; ".join(f"{p.name}: {p.role}" for p in players),
+                            out_so_far="; ".join(public_history) or "nobody")
 
 
 def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_chat_file, players,

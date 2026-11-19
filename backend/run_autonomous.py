@@ -20,8 +20,10 @@ null turns narration off. "voice" is the Deepgram voice that speaks the moderato
 (flux-hannah-en by default, needs DEEPGRAM_API_KEY), null for a silent moderator.
 
 "variant": "misinformation" plays Mafia with unreliable information: anyone may bluff (see
-MISINFORMATION_RULES in llm_players/llm_constants.py), and each mafia player gets a cover
-role to claim (llm_config "cover_role"). Left out, the game is plain Mafia.
+MISINFORMATION_RULES in llm_players/llm_constants.py), each mafia player gets a cover role
+to claim (llm_config "cover_role"), and one villager is secretly told it is the detective
+(special_role "false_detective"; the storyteller chooses its answers). Left out, the game
+is plain Mafia.
 
 Cost: on every turn a player asks its model, with the whole chat so far, whether to speak.
 "seconds_between_turns" (in "llm_defaults" or per seat) is the pause after each turn, so
@@ -48,7 +50,7 @@ from game_constants import DIRS_PREFIX, GAMES_INDEX_FILE, WHO_WINS_FILE, MAFIA_W
     PLAYERS_KEY_IN_CONFIG, DAYTIME_MINUTES_KEY, NIGHTTIME_MINUTES_KEY, DEFAULT_DAYTIME_MINUTES, \
     DEFAULT_NIGHTTIME_MINUTES, OPTIONAL_CODE_NAMES, MAFIA_ROLE, DETECTIVE_ROLE, DOCTOR_ROLE, \
     TOWN_ROLES, MODERATOR_MODEL_KEY, NIGHT_FIRST_KEY, MODERATOR_VOICE_KEY, NIGHT_PACING_KEY, \
-    VARIANT_KEY, MISINFORMATION_VARIANT
+    VARIANT_KEY, MISINFORMATION_VARIANT, FALSE_DETECTIVE_ROLE, VILLAGER_ROLE
 from llm_players.llm_constants import LLM_CONFIG_KEY, MODEL_NAME_KEY, USE_OPENROUTER_KEY, \
     USE_MOCK_KEY, MOCK_MODEL_NAME, PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, \
     DEFAULT_PASS_TURN_TOKEN, DEFAULT_USE_TURN_TOKEN, ASYNC_TYPE_KEY, SCHEDULE_THEN_GENERATE_TYPE, \
@@ -98,6 +100,10 @@ def validate_table(table):
     if table.get("variant") not in (None, MISINFORMATION_VARIANT):
         problems.append(f"\"variant\" must be \"{MISINFORMATION_VARIANT}\" or left out, "
                         f"got {table.get('variant')!r}")
+    if table.get("variant") == MISINFORMATION_VARIANT and \
+            (DETECTIVE_ROLE not in roles or VILLAGER_ROLE not in roles):
+        problems.append("the misinformation variant needs a detective and at least 1 villager "
+                        "(a villager is secretly told it's the detective)")
     if problems:
         sys.exit("Invalid table config:\n" + "\n".join(f"  - {problem}" for problem in problems))
 
@@ -130,6 +136,9 @@ def build_game_config(table, table_path):
     seats = [{**seat, "role": role} for seat, role in zip(seats, roles)]
     # a new seat order and new names every game, so that neither can bias the votes
     random.shuffle(seats)
+    if table.get("variant") == MISINFORMATION_VARIANT:  # a villager is told it's the detective
+        false_detective = random.choice([seat for seat in seats if seat["role"] == VILLAGER_ROLE])
+        false_detective["role"] = FALSE_DETECTIVE_ROLE
     names = random.sample(OPTIONAL_CODE_NAMES, len(seats))
     players = []
     for name, seat in zip(names, seats):

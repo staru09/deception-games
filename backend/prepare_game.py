@@ -8,7 +8,7 @@ from game_constants import DIRS_PREFIX, DEFAULT_GAME_CONFIG, GAME_ID_NUM_DIGITS,
     GAME_START_TIME_FILE, NOTES_FILE, REAL_NAME_CODENAME_DELIMITER, REAL_NAMES_FILE, \
     PLAYERS_KEY_IN_CONFIG, PERSONAL_STATUS_FILE_FORMAT, PERSONAL_CHAT_FILE_FORMAT, \
     PERSONAL_VOTE_FILE_FORMAT, LLM_LOG_FILE_FORMAT, PERSONAL_SURVEY_FILE_FORMAT, \
-    PRIVATE_NOTES_FILE_FORMAT, REASONING_FILE_FORMAT, EVENTS_FILE, NIGHT_ROLES
+    PRIVATE_NOTES_FILE_FORMAT, REASONING_FILE_FORMAT, EVENTS_FILE, NIGHT_ROLES, FALSE_DETECTIVE_ROLE
 from prepare_config import PlayerConfig
 
 
@@ -70,7 +70,7 @@ def init_game(game_id, config):
         (game_dir / PERSONAL_CHAT_FILE_FORMAT.format(player.name)).touch()
         (game_dir / PERSONAL_VOTE_FILE_FORMAT.format(player.name)).touch()
         (game_dir / PERSONAL_STATUS_FILE_FORMAT.format(player.name)).touch()
-        if player.special_role in NIGHT_ROLES:
+        if player.special_role in (*NIGHT_ROLES, FALSE_DETECTIVE_ROLE):  # it acts like the detective
             (game_dir / PRIVATE_NOTES_FILE_FORMAT.format(player.name)).touch()
         if player.is_llm:
             (game_dir / LLM_LOG_FILE_FORMAT.format(player.name)).touch()

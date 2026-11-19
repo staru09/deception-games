@@ -30,7 +30,7 @@ import { pointScale, pointPx } from './scene/particles.js';
 import { createAngel } from './scene/angel.js';
 
 const FALLBACK_COLORS = ['#f2c14e', '#4ea8de', '#b388eb', '#ff8c42', '#3ddbd9', '#f78fb3', '#a3d977', '#c9ada7'];
-const ROLES = ['mafia', 'detective', 'doctor', 'villager'];
+const ROLES = ['mafia', 'detective', 'doctor', 'villager', 'false_detective'];
 const AGREE = /^\s*(yes|yeah|yep|yup|agreed?|same|ok|okay|true|exactly|right|sure|fair)\b/i;
 const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
 const live = new WeakMap();   // container -> running scene, so creating a second one replaces the first

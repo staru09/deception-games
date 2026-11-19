@@ -9,7 +9,7 @@ import { aliveCounts } from './state.js';
 
 const $ = (id) => document.getElementById(id);
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const ROLES = new Set(['mafia', 'detective', 'doctor', 'villager']);
+const ROLES = new Set(['mafia', 'detective', 'doctor', 'villager', 'false_detective']);
 const keep = (kids) => kids.flat(2).filter((k) => k != null && k !== false && k !== '');
 
 function h(tag, props, ...kids) {
@@ -89,7 +89,7 @@ export function createUI({ players, on, initial = {} }) {
     return b;
   }
   const roleClass = (role) => 'role role-' + (ROLES.has(role) ? role : 'other');
-  const roleTag = (role) => h('span', { class: roleClass(role), text: role });
+  const roleTag = (role) => h('span', { class: roleClass(role), text: role.replace('_', ' ') });
   const tag = (text, cls) => h('span', { class: 'tag ' + cls, text });
   const died = (st) => `${st.cause === 'night' ? 'Killed' : 'Voted out'} on ${phaseName(st.diedIn.phase, st.diedIn.round).toLowerCase()}`;
   // A game that stopped without a winner, watched to its last event. view.halt says why:
@@ -248,7 +248,8 @@ export function createUI({ players, on, initial = {} }) {
       }
       case 'investigate':
         el = h('p', { class: 'private' }, tag('private', 'tag-private'), pname(e.detective), ' investigated ', pname(e.target), ': ',
-          h('strong', { class: e.is_mafia ? 'bad' : 'good', text: e.is_mafia ? 'mafia' : 'not mafia' }));
+          h('strong', { class: e.is_mafia ? 'bad' : 'good', text: e.is_mafia ? 'mafia' : 'not mafia' }),
+          e.misled && [' ', tag('false answer', 'tag-mafia')]);
         break;
       case 'protect':
         el = h('p', { class: 'private' }, tag('private', 'tag-private'), pname(e.doctor),

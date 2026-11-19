@@ -158,21 +158,28 @@ ROLE_INFO = {
 # differ from plain Mafia (the detective may share or bluff, since nothing is certain anyway).
 MISINFORMATION_RULES = ("This game uses the misinformation rules: information is unreliable, "
                         "and anyone may lie. Town players may also bluff about their role or "
-                        "about what they learned, if they think it helps the town.")
+                        "about what they learned, if they think it helps the town. One of the "
+                        "villagers has been secretly told that they are the detective: each "
+                        "night they pick a player just like the detective, but their answers "
+                        "come from the storyteller and may be false. Nobody knows who it is, not "
+                        "even that player, until their role is revealed when they are out.")
 MISINFORMATION_ROLE_INFO = {
     **ROLE_INFO,
     DETECTIVE_ROLE: "As the detective, every Nighttime you secretly pick one player you are "
                     "doubtful about, and the game manager privately tells you whether they are "
-                    "mafia. You may share what you learn, keep it to yourself, or bluff, "
-                    "whatever helps the town most.",
+                    "mafia. Your answers may be false: you might be the villager who was only "
+                    "told they are the detective. You may share what you learn, keep it to "
+                    "yourself, or bluff, whatever helps the town most.",
 }
 # In the misinformation variant each mafia player starts with a cover: a role it can claim and
 # how to make the claim hold up. The launcher picks it (llm_config "cover_role").
 COVER_ROLE_KEY = "cover_role"
 MAFIA_COVER_STORIES = {
-    DETECTIVE_ROLE: "Your cover: if you need to claim a role, claim to be the detective. Make up "
-                    "night results that fit the game, for example that you checked players who "
-                    "are really town, and accuse one of them when it helps you.",
+    DETECTIVE_ROLE: "Your cover: if you need to claim a role, claim to be the detective. Two "
+                    "detective claims are expected, since a villager secretly believes they "
+                    "are the detective. Make up night results that fit the game, for example "
+                    "that you checked players who are really town, and accuse one of them when "
+                    "it helps you.",
     DOCTOR_ROLE: "Your cover: if you need to claim a role, claim to be the doctor. Make up "
                  "protections that fit what happened at night, for example that you saved the "
                  "player the town thinks the mafia went after.",
