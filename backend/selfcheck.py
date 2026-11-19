@@ -305,6 +305,8 @@ def check_game(game_dir):
     alive = set(roles)
     is_mafia = lambda name: roles[name] == MAFIA_ROLE
     phase = protected = last_protected = None
+    is_misinformation = config.get(VARIANT_KEY) == MISINFORMATION_VARIANT
+    real_detective_misled = 0
     round_number = 0
     seen = set()
     # with a moderator, each night choice comes right after the question for it
@@ -342,7 +344,11 @@ def check_game(game_dir):
             # an answer is false exactly when it's flagged misled, and only the false
             # detective's can be (its answers come from the storyteller)
             assert (event["is_mafia"] != is_mafia(event["target"])) == event.get("misled", False), event
-            assert not event.get("misled") or roles[event["detective"]] == FALSE_DETECTIVE_ROLE, event
+            # the real detective can be misled too, once per game, and only in the variant
+            if event.get("misled") and roles[event["detective"]] == DETECTIVE_ROLE:
+                real_detective_misled += 1
+                assert is_misinformation and real_detective_misled == 1, event
+                seen.add("real detective misled")
             seen.add("false detective" if roles[event["detective"]] == FALSE_DETECTIVE_ROLE else "detective")
         elif kind == "protect":
             assert phase == "night" and roles[event["doctor"]] == DOCTOR_ROLE, event

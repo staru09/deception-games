@@ -162,14 +162,17 @@ MISINFORMATION_RULES = ("This game uses the misinformation rules: information is
                         "villagers has been secretly told that they are the detective: each "
                         "night they pick a player just like the detective, but their answers "
                         "come from the storyteller and may be false. Nobody knows who it is, not "
-                        "even that player, until their role is revealed when they are out.")
+                        "even that player, until their role is revealed when they are out. Even "
+                        "the real detective is given one false answer in the game, on a night "
+                        "of the storyteller's choosing.")
 MISINFORMATION_ROLE_INFO = {
     **ROLE_INFO,
     DETECTIVE_ROLE: "As the detective, every Nighttime you secretly pick one player you are "
                     "doubtful about, and the game manager privately tells you whether they are "
                     "mafia. Your answers may be false: you might be the villager who was only "
-                    "told they are the detective. You may share what you learn, keep it to "
-                    "yourself, or bluff, whatever helps the town most.",
+                    "told they are the detective, and even the real detective is given one "
+                    "false answer on a night the storyteller chooses. You may share what you "
+                    "learn, keep it to yourself, or bluff, whatever helps the town most.",
 }
 # In the misinformation variant each mafia player starts with a cover: a role it can claim and
 # how to make the claim hold up. The launcher picks it (llm_config "cover_role").

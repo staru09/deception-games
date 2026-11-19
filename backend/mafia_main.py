@@ -10,6 +10,8 @@ game_dir = Path()  # will be updated only if __name__ == __main__ (prevents new 
 moderator = None  # narrates for spectators when the config names a model (see moderator.py)
 public_history = []  # what everyone knows: who is out and how, for the moderator
 night_pacing = False  # set from the config in main(); see hear() and hold()
+misinformation = False  # the misinformation variant, set from the config in main()
+detective_misled = False  # in that variant, the real detective gets one false answer per game
 ANSWER_HOLD_SECONDS = 2.5  # how long a night answer stays alone on screen before the next question
 
 
@@ -184,6 +186,7 @@ def run_night_roles(players, round_number):
     notes and to the spectator log, never to a chat file that another player reads.
     Returns the name the doctor protected (None without a living doctor).
     """
+    global detective_misled
     players_by_name = {player.name: player for player in players}
     protected_name = None
     # The moderator asks the doctor, then the detective (the mafia were asked just before).
@@ -212,13 +215,21 @@ def run_night_roles(players, round_number):
         target = players_by_name.get(player.wait_for_vote())
         if target:
             told = target.is_mafia
+            truth = "mafia" if target.is_mafia else "not mafia"
             if player.special_role == FALSE_DETECTIVE_ROLE:  # the storyteller chooses its answer
-                truth = "mafia" if target.is_mafia else "not mafia"
                 told = storyteller_choice(
                     f"{player.name} is the false detective: a villager who believes they are the "
                     f"detective. Tonight they asked about {target.name}, who is really {truth}. "
                     f"What do you tell {player.name}?", ["mafia", "not mafia"],
                     players, round_number) == "mafia"
+            elif misinformation and not detective_misled:  # the real detective's one false answer
+                if storyteller_choice(
+                        f"{player.name} is the real detective. Tonight they asked about "
+                        f"{target.name}, who is really {truth}. Once in the game you give the "
+                        f"real detective a false answer, and you haven't yet. Is tonight the "
+                        f"night?", ["no", "yes"], players, round_number) == "yes":
+                    told = not target.is_mafia
+                    detective_misled = True
             result = "is MAFIA" if told else "is NOT mafia"
             player.add_private_note(f"Night {round_number}: you investigated {target.name} - "
                                     f"{target.name} {result}.")
@@ -367,13 +378,14 @@ def end_game(players, round_number):
 
 
 def main():
-    global game_dir, moderator, night_pacing
+    global game_dir, moderator, night_pacing, misinformation
     game_dir = get_game_dir_from_argv()
     config = get_config()
     players = get_players(config)
     if config.get(MODERATOR_MODEL_KEY):
         moderator = Moderator(config[MODERATOR_MODEL_KEY], game_dir, config.get(MODERATOR_VOICE_KEY))
     night_pacing = config.get(NIGHT_PACING_KEY, False)
+    misinformation = config.get(VARIANT_KEY) == MISINFORMATION_VARIANT
     # A round is Daytime then Nighttime, or with night_first (autonomous games) Nighttime then
     # Daytime: the first discussion then has a night's result to work with, and nobody votes
     # before anyone has died.
