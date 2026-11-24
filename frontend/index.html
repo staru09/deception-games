@@ -30,36 +30,16 @@
     <div class="cards" id="cards"></div>
   </section>
 
-  <!-- #<game>: one game's runs and the New run panel -->
+  <!-- #<game>: one game's stats, the New run panel and its launchers -->
   <section id="game" hidden>
     <a class="back" href="#">← All games</a>
     <header class="game-head">
       <h1><span class="emblem" id="g-emblem" aria-hidden="true"></span><span id="g-title"></span></h1>
       <p class="muted" id="g-desc"></p>
       <dl class="stats" id="g-stats"></dl>
-      <a id="g-viewer" href="#">Open the viewer</a>
+      <a class="enter" id="g-viewer" href="#">Open the viewer</a>
     </header>
     <div class="cols">
-      <section class="glass panel" aria-labelledby="runs-h">
-        <div class="panel-head">
-          <h2 id="runs-h">Runs</h2>
-          <label class="inline">Status
-            <select id="filter">
-              <option value="all">all</option><option value="live">live</option>
-              <option value="finished">finished</option><option value="aborted">aborted</option>
-            </select>
-          </label>
-        </div>
-        <div class="scroll">
-          <table>
-            <thead><tr><th scope="col">ID</th><th scope="col">Date</th><th scope="col">Models</th>
-              <th scope="col">Status</th><th scope="col">Winner</th><th scope="col"><span class="sr">Viewer</span></th></tr></thead>
-            <tbody id="runs"></tbody>
-          </table>
-        </div>
-        <p class="muted" id="runs-empty" hidden>No runs with this status.</p>
-      </section>
-
       <section class="glass panel" aria-labelledby="nr-h">
         <h2 id="nr-h">New run</h2>
         <label class="field">Start from a saved table <select id="nr-table"></select></label>

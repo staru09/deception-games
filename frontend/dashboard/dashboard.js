@@ -1,4 +1,4 @@
-// The arena dashboard: the four games, their runs, starting and stopping AI runs, through the
+// The arena dashboard: the four games, starting and stopping AI runs, through the
 // server's API (docs/ARENA_CONTRACT.md §7). Routes: #  every game,  #<game>  one game's page.
 //
 // This is the operator's page, so it shows model ids (the viewers never do). Every value from the
@@ -73,7 +73,6 @@ async function post(url, body) {
 
 const when = (s) => (s ? new Date(s * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : '—');
 const money = (x) => (x == null ? '?' : `$${x.toFixed(2)}`);
-const statusOf = (run) => (run.winner == null ? 'live' : run.winner === 'aborted' ? 'aborted' : 'finished');
 const stat = (label, value, cls) => h('div', {}, h('dt', { text: label }), h('dd', { class: cls, text: String(value) }));
 const winsText = (g) => Object.entries(g.wins).map(([k, n]) => `${k} ${n}`).join(' · ') || 'none yet';
 const intOf = (id) => Number.parseInt($(id).value, 10);
@@ -119,18 +118,6 @@ function renderGame() {
   $('g-desc').textContent = g.description;
   $('g-stats').replaceChildren(...stats(g));
   $('g-viewer').href = `/${route}/`;
-  const filter = $('filter').value;
-  const runs = g.list.filter((run) => filter === 'all' || statusOf(run) === filter);
-  $('runs').replaceChildren(...runs.map((run) => h('tr', {},
-    h('td', { class: 'mono', text: run.id }),
-    h('td', { text: when(run.started) }),
-    h('td', { class: 'models', text: (run.models ?? []).join(', ') }),
-    h('td', {}, h('span', { class: 'badge ' + statusOf(run), text: statusOf(run) })),
-    h('td', { text: run.winner && run.winner !== 'aborted'
-      ? run.winner + (run.seats?.[run.winner] ? ` (${run.seats[run.winner]})` : '') : '—' }),
-    h('td', {}, h('a', { href: `/${route}/?game=${encodeURIComponent(run.id)}`, text: 'Watch' })))));
-  $('runs-empty').hidden = runs.length > 0;
-  $('runs-empty').textContent = g.list.length ? 'No runs with this status.' : 'No runs yet.';
   renderEstimate();
 }
 
@@ -322,7 +309,6 @@ function go() {
   document.body.dataset.route = route ?? 'home';
   document.title = route ? `${games[route].title} · Arena` : 'Arena';
   if (route) {
-    $('filter').value = 'all';
     renderGame();
     openNewRun(route);
   }
@@ -330,7 +316,6 @@ function go() {
   scrollTo(0, 0);
 }
 
-$('filter').addEventListener('change', () => renderGame());
 $('nr-table').addEventListener('change', pickTable);
 $('nr-add').addEventListener('click', addSeat);
 $('nr-games').addEventListener('input', renderEstimate);
