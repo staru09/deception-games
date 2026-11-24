@@ -2,24 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Senate viewer</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../common/arena.css">
 <link rel="stylesheet" href="style.css">
+<!-- scene.js (and the Mafia scene modules it reuses) import Three.js through this map -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body>
-<header class="top">
-  <a class="back" href="/">&larr; Arena</a>
-  <h1>Senate</h1>
-  <div id="meta" class="meta"></div>
-</header>
 <div id="empty" class="empty glass" hidden></div>
-<main id="app" hidden>
-  <div class="rp-wrap glass" id="controls"></div>
+<div class="app" id="app" hidden>
+  <header class="top">
+    <a class="back" href="/">&larr; Arena</a>
+    <h1>Senate</h1>
+    <div id="meta" class="meta"></div>
+  </header>
+  <main class="chamber" id="chamber" aria-label="Senate chamber">
+    <div class="scene" id="scene"></div>
+    <p class="placeholder" id="placeholder">Preparing the chamber&hellip;</p>
+    <div class="caption glass" id="caption" role="status" aria-live="polite"></div>
+  </main>
   <section class="board" id="board" aria-label="Board"></section>
+  <div class="rp-wrap glass" id="controls"></div>
   <aside class="log glass" aria-label="Transcript"><h2>Transcript</h2><ol id="log" aria-live="polite"></ol></aside>
-</main>
+</div>
 <script type="module" src="main.js"></script>
 </body>
 </html>

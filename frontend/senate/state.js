@@ -108,7 +108,7 @@ export function apply(s, ev) {
       if (s.hand?.cards === null && s.hand.n === 3) s.drawPile += 3;
       s.hand = null;
       s.step = { kind: 'over' };
-      sys(s, `${cap(ev.winner)} win (${ev.reason.replace('_', ' ')}).`, ev.winner === 'loyalists' ? 'good' : 'bad');
+      sys(s, `${ev.winner === 'loyalists' ? 'Loyalists win' : 'Conspiracy wins'} (${ev.reason.replace('_', ' ')}).`, ev.winner === 'loyalists' ? 'good' : 'bad');
       break;
   }
   return s;

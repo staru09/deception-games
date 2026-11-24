@@ -1,5 +1,6 @@
-// Senate UI: render(state, ctx) redraws the board and the transcript. Names only, never models.
-// Roles show in god view and after game_over; secret events only ever reach us in god view.
+// Senate UI: render(state, ctx, has3d) redraws the transcript and either the caption over the 3D chamber
+// (has3d) or the 2D board, the fallback when WebGL or the CDN fails and with ?scene=off. Names only,
+// never models. Roles show in god view and after game_over; secret events only ever reach us in god view.
 import { powerSlots, REFORMS_TO_WIN, DECREES_TO_WIN, CHAOS_AT } from './state.js';
 
 const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -12,6 +13,7 @@ const POWER = {   // label and a 24px icon path (stroke only)
   execution: ['Execution', '<path d="M5 5l14 14M19 5L5 19"/><circle cx="12" cy="12" r="9"/>'],
 };
 const icon = (k) => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${POWER[k][1]}</svg>`;
+const cap = (x) => x[0].toUpperCase() + x.slice(1);
 const ROLE = { loyalist: 'Loyalist', conspirator: 'Conspirator', usurper: 'Usurper' };
 const SIDE = { loyalist: 'good', conspirator: 'bad', usurper: 'bad' };
 const REASON = { reforms: 'five Reforms enacted', decrees: 'six Decrees enacted', usurper_executed: 'the Usurper was executed', usurper_elected: 'the Usurper was elected Prefect' };
@@ -52,7 +54,7 @@ function seats(s, ctx, roleOf) {
   }).join('')}</ol>`;
 }
 
-function stage(s, ctx) {
+function stage(s, ctx, compact) {   // compact: the 3D chamber shows the cards and the speech itself
   const st = s.step, god = ctx.god;
   let head = '', body = '';
   switch (st.kind) {
@@ -64,7 +66,7 @@ function stage(s, ctx) {
     case 'result':
       head = st.passed ? `Passed, ${st.ayes} to ${st.nays}` : `Failed, ${st.ayes} to ${st.nays}`;
       body = st.passed ? `${esc(s.consul)} and ${esc(s.prefect)} take office.` : `Failed votes: ${s.tracker} of ${CHAOS_AT}.`;
-      if (st.passed && s.hand) body += `<div class="hand">${handHtml(s, god)}</div>`;
+      if (st.passed && s.hand && !compact) body += `<div class="hand">${handHtml(s, god)}</div>`;
       break;
     case 'veto':
       head = st.accepted ? 'Veto accepted' : 'Veto refused';
@@ -72,23 +74,24 @@ function stage(s, ctx) {
       break;
     case 'enacted':
       head = st.by === 'chaos' ? 'Chaos' : `${esc(st.by)} enacts`;
-      body = `<div class="hand">${card(st.law)}</div>` + (st.by === 'chaos' ? '<p>Three failed votes: the top law is enacted.</p>' : '');
+      body = compact ? `A ${cap(st.law)} goes on its track.` : `<div class="hand">${card(st.law)}</div>`;
+      if (st.by === 'chaos') body += compact ? ' Three failed votes: the top law is enacted.' : '<p>Three failed votes: the top law is enacted.</p>';
       break;
     case 'power': {
       head = POWER[st.power][0];
       const who = esc(st.by);
       body = st.power === 'peek' ? `${who} looks at the top three laws.` : `${who} targets ${esc(st.target)}.`;
-      if (st.result && god) body += `<p class="secret">${Array.isArray(st.result) ? st.result.map((l) => card(l)).join('') : `${esc(st.target)} is ${esc(st.result)}.`}</p>`;
+      if (st.result && god) body += `<p class="secret">${Array.isArray(st.result) ? (compact ? `The top three: ${st.result.join(', ')}.` : st.result.map((l) => card(l)).join('')) : `${esc(st.target)} is ${esc(st.result)}.`}</p>`;
       if (st.executed) body += `<p>${esc(st.executed)} is executed.</p>`;
       break;
     }
     case 'over': {
       const win = s.over.winner === 'loyalists';
-      head = `${win ? 'Loyalists' : 'Conspiracy'} win`; body = esc(REASON[s.over.reason] ?? s.over.reason);
+      head = win ? 'Loyalists win' : 'Conspiracy wins'; body = esc(REASON[s.over.reason] ?? s.over.reason);
       break;
     }
   }
-  if (['debate', 'report'].includes(st.kind) && st.speaker) body += `<blockquote><b>${esc(st.speaker)}</b> ${esc(st.text)}</blockquote>`;
+  if (['debate', 'report'].includes(st.kind) && st.speaker && !compact) body += `<blockquote><b>${esc(st.speaker)}</b> ${esc(st.text)}</blockquote>`;
   return `<div class="stage ${st.kind === 'over' ? (s.over.winner === 'loyalists' ? 'good' : 'bad') : ''}"><h2>${head}</h2><div>${body}</div></div>`;
 }
 
@@ -108,13 +111,18 @@ function transcript(rows, ctx) {
 }
 
 // Redraw only what changed: replacing a node would drop a text selection or focus in it.
-let lastBoard = '', logCount = 0, logGod = null;
-export function render(s, ctx) {
+let lastBoard = '', lastCaption = '', logCount = 0, logGod = null;
+export function render(s, ctx, has3d) {
   const reveal = ctx.god || s.over;
   const roleOf = (name) => (reveal ? s.roles[name] ?? ctx.config.players.find((p) => p.name === name)?.role : null);
   $('meta').textContent = `Game ${ctx.id}${s.round ? ` \u00b7 Round ${s.round}` : ''} \u00b7 ${s.players.filter((p) => p.alive).length} of ${s.players.length} alive${ctx.god ? ' \u00b7 God view' : ''}`;
-  const board = tracks(s) + seats(s, ctx, roleOf) + stage(s, ctx);
-  if (board !== lastBoard) $('board').innerHTML = lastBoard = board;
+  if (has3d) {
+    const caption = stage(s, ctx, true);
+    if (caption !== lastCaption) $('caption').innerHTML = lastCaption = caption;
+  } else {
+    const board = tracks(s) + seats(s, ctx, roleOf) + stage(s, ctx);
+    if (board !== lastBoard) $('board').innerHTML = lastBoard = board;
+  }
   const log = $('log');
   if (ctx.god !== logGod || s.log.length < logCount) { log.innerHTML = ''; logCount = 0; logGod = ctx.god; }
   if (s.log.length > logCount) {   // the log only grows between seeks, so append the new rows

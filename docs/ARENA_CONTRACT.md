@@ -213,7 +213,9 @@ Index `winner`: the player name with the higher total, or `"draw"`.
   replay `frontend/<game>/fixtures/demo/{config.json,events.jsonl}` and assert the state.
 - Names only: no model names anywhere in a viewer. Works at 360 px wide, dark and light.
 - Senate: town view by default (`godLabel: "God view"`); roles show in god view and after
-  `game_over`. Poker: `godLabel: "Broadcast view"`, `godDefault: true` (hole cards shown).
+  `game_over`. Its stage is a 3D chamber (frontend/senate/scene.js, chamber.js, stage.js) built on
+  the Mafia viewer's scene modules and CC0 characters (frontend/mafia/scene/*.js and assets), so
+  their exports are shared API; `?scene=off`, or a failed WebGL/CDN load, falls back to the 2D board. Poker: `godLabel: "Broadcast view"`, `godDefault: true` (hole cards shown).
 - A link back to the dashboard (`/`) on every viewer page.
 
 ## 7. Server and API (`backend/server.py`, 127.0.0.1 only)

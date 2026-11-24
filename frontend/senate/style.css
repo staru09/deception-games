@@ -1,20 +1,43 @@
-/* Senate viewer, on top of ../common/arena.css. Reform / Loyalists use --good, Decree / Conspiracy
-   use --bad; every colour-coded thing also says its name in words. */
-body { padding: 0 16px 24px; }
-.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; max-width: 1280px; margin: 0 auto; padding: 14px 0 10px; }
+/* Senate viewer, on top of ../common/arena.css. The 3D chamber is the stage, the replay controls sit
+   under it and the transcript beside it (below it on a phone). Without the chamber (.no-scene) the 2D
+   board takes its place. Reform / Loyalists use --good, Decree / Conspiracy use --bad; every
+   colour-coded thing also says its name in words. */
+.app {
+  height: 100vh; height: 100dvh; padding: 6px 12px 12px; display: grid; gap: 10px;
+  grid-template: "top top" auto "stage log" minmax(0, 1fr) "ctl log" auto / minmax(0, 1fr) clamp(300px, 27vw, 400px);
+}
+.top { grid-area: top; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 4px 2px 0; min-width: 0; }
 .top h1 { font-size: 22px; }
 .back { color: var(--muted); text-decoration: none; font-size: 13px; }
 .back:hover { color: var(--gold); }
 .meta { color: var(--muted); font-size: 13px; margin-left: auto; }
 .empty { max-width: 480px; margin: 40px auto; padding: 24px; text-align: center; }
-
-main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-areas: 'ctl ctl' 'board log'; gap: 12px; max-width: 1280px; margin: 0 auto; }
+.app > * { min-width: 0; }
 .rp-wrap { grid-area: ctl; }
-main > *, .tracks > * { min-width: 0; }
-.board { container-type: inline-size; grid-area: board; display: grid; gap: 14px; align-content: start; min-width: 0; }
-.log { grid-area: log; display: flex; flex-direction: column; max-height: calc(100vh - 150px); min-height: 360px; padding: 12px 14px; overflow: hidden; }
+.log { grid-area: log; display: flex; flex-direction: column; min-height: 0; padding: 12px 14px; overflow: hidden; }
 .log h2 { font-size: 14px; margin-bottom: 8px; }
 .log ol { list-style: none; margin: 0; padding: 0 4px 0 0; display: grid; gap: 6px; align-content: start; overflow-y: auto; flex: 1; min-width: 0; }
+
+/* the 3D chamber */
+.chamber { grid-area: stage; position: relative; min-height: 0; overflow: hidden; border-radius: var(--radius); border: 1px solid var(--line); background: #15130f; box-shadow: var(--shadow); }
+.scene { position: absolute; inset: 0; }
+.chamber::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; box-shadow: inset 0 0 90px rgba(20, 12, 4, .38); }   /* a soft vignette */
+.placeholder { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; font: 500 15px var(--head); letter-spacing: .08em; color: #d8c9a4; background: radial-gradient(circle at 50% 40%, rgba(233, 196, 106, .22), transparent 50%), linear-gradient(#2b2720, #15130f); }
+.caption { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: max-content; max-width: min(620px, calc(100% - 20px)); padding: 7px 16px 8px; text-align: center; pointer-events: none; }
+.caption:empty { display: none; }
+.caption .stage { padding: 0; background: none; border: 0; min-height: 0; }
+.caption .stage h2 { font-size: 16px; margin: 0 0 1px; letter-spacing: .06em; }
+.caption .stage > div { font-size: 13px; color: var(--muted); }
+.caption .stage p { display: inline; margin: 0 0 0 4px; }
+.caption:has(.stage.good) { border-color: var(--good); } .caption:has(.stage.bad) { border-color: var(--bad); }
+.caption:has(.stage.good, .stage.bad) { padding: 10px 28px; box-shadow: var(--shadow), 0 0 40px rgba(233, 196, 106, .25); }
+.caption .stage.good h2, .caption .stage.bad h2 { font-size: 24px; }
+.caption .stage.good h2 { color: var(--good); } .caption .stage.bad h2 { color: var(--bad); }
+
+/* the 2D board, only without the chamber */
+.board { display: none; }
+.no-scene .chamber { display: none; }
+.no-scene .board { container-type: inline-size; grid-area: stage; display: grid; gap: 14px; align-content: start; min-height: 0; overflow-y: auto; }
 
 /* law tracks */
 .tracks { display: grid; grid-template-columns: 5fr 6fr; gap: 10px 16px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
@@ -77,9 +100,15 @@ main > *, .tracks > * { min-width: 0; }
 .sys.good { border-left-color: var(--good); } .sys.bad { border-left-color: var(--bad); } .sys.warn { border-left-color: var(--gold); }
 .sys.secret { color: var(--gold); font-style: italic; }
 
-@media (max-width: 860px) {
-  main { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'ctl' 'board' 'log'; }
-  .log { max-height: 420px; }
+/* phone: the chamber on top, the controls, then the transcript; the page scrolls */
+@media (max-width: 800px) {
+  .app { height: auto; min-height: 100dvh; padding: 6px 8px 12px; gap: 8px; grid-template: "top" auto "stage" auto "ctl" auto "log" auto / minmax(0, 1fr); }
+  .chamber { height: clamp(320px, 62dvh, 560px); }
+  .log { max-height: 75dvh; min-height: 260px; }
+  .no-scene .board { overflow: visible; }
+  .caption { bottom: 6px; padding: 5px 12px 6px; }
+  .caption .stage h2 { font-size: 14px; } .caption .stage > div { font-size: 12px; }
+  .caption .stage.good h2, .caption .stage.bad h2 { font-size: 19px; }
 }
 @media (max-width: 640px) {
   .tracks { grid-template-columns: 1fr; }
