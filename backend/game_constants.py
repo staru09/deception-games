@@ -222,8 +222,17 @@ def minutes_to_seconds(num_minutes):
     return int(num_minutes * 60)
 
 
+# A resumed game (run_autonomous.py --resume) runs its clock this many seconds behind, so its
+# chat times and events go on from where the game stopped instead of jumping days ahead.
+CLOCK_OFFSET_SECONDS = float(os.environ.get("LLMAFIA_CLOCK_OFFSET", 0))
+
+
+def game_time():
+    return time.time() - CLOCK_OFFSET_SECONDS
+
+
 def get_current_timestamp():
-    return time.strftime(TIME_FORMAT_FOR_TIMESTAMP)
+    return time.strftime(TIME_FORMAT_FOR_TIMESTAMP, time.localtime(game_time()))
 
 
 def format_message(name, message):

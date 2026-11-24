@@ -137,6 +137,15 @@ def add_message_to_game(player, message_history):
         print(colored(MODEL_CHOSE_TO_PASS_TURN_LOG, OPERATOR_COLOR))
 
 
+def get_last_protected(player):
+    """Whom the doctor protected last night (None for anyone else, or before the first night)."""
+    notes_file = game_dir / PRIVATE_NOTES_FILE_FORMAT.format(player.name)
+    if player.special_role != DOCTOR_ROLE or not notes_file.exists():
+        return None
+    protected = re.findall(r"you protected (\S+)\.$", notes_file.read_text(), re.MULTILINE)
+    return protected[-1] if protected else None
+
+
 def end_game(eliminated: bool):
     if not eliminated:
         print(colored(GAME_ENDED_MESSAGE, OPERATOR_COLOR))
@@ -151,7 +160,8 @@ def main():
     message_history = []
     num_read_lines_manager = num_read_lines_daytime = num_read_lines_nighttime = 0
     eliminated = False
-    last_protected = None  # only the doctor uses it
+    # only the doctor uses it; read from its notes, which hold it when a stopped game is resumed
+    last_protected = get_last_protected(player)
     while not is_game_over(game_dir):
         num_read_lines_manager += read_messages_from_file(
             message_history, PUBLIC_MANAGER_CHAT_FILE, num_read_lines_manager)

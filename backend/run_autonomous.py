@@ -31,6 +31,16 @@ it sets how many of these calls a game makes. Without it a player asks again rig
 
 Games are written to ./autonomous_games (or LLMAFIA_GAMES_DIR), one after the other, or with
 --parallel N, N at a time (one launcher at a time: it alone hands out the game ids).
+
+A game that stopped (say the API budget ran out) goes on from where it stopped with
+
+    python run_autonomous.py --resume 0008 0009 ... [--parallel N]
+
+Nothing that happened is played again: the manager rebuilds its state from events.jsonl and
+the phase that was cut off goes on with the time it had left (see restore() in mafia_main.py).
+The game's clock goes on from the moment it stopped, so the chat shows no gap, and a "resumed"
+event in events.jsonl records the real time. A game that stopped while votes were being
+counted can't be resumed.
 """
 import os
 from pathlib import Path
@@ -50,6 +60,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 from game_constants import DIRS_PREFIX, GAMES_INDEX_FILE, WHO_WINS_FILE, MAFIA_WINS_MESSAGE, \
+    GAME_CONFIG_FILE, EVENTS_FILE, REMAINING_PLAYERS_FILE, PERSONAL_STATUS_FILE_FORMAT, \
     PLAYERS_KEY_IN_CONFIG, DAYTIME_MINUTES_KEY, NIGHTTIME_MINUTES_KEY, DEFAULT_DAYTIME_MINUTES, \
     DEFAULT_NIGHTTIME_MINUTES, OPTIONAL_CODE_NAMES, MAFIA_ROLE, DETECTIVE_ROLE, DOCTOR_ROLE, \
     TOWN_ROLES, MODERATOR_MODEL_KEY, NIGHT_FIRST_KEY, MODERATOR_VOICE_KEY, NIGHT_PACING_KEY, \
@@ -208,18 +219,45 @@ def run_game(table, table_path, timeout_minutes, start_delay=0):
         game_dir = Path(DIRS_PREFIX) / game_id
         models = sorted({player[LLM_CONFIG_KEY][MODEL_NAME_KEY] for player in config[PLAYERS_KEY_IN_CONFIG]})
         update_index(game_id, started=time.time(), models=models, winner=None)
+    return play(game_id, [player["name"] for player in config[PLAYERS_KEY_IN_CONFIG]],
+                timeout_minutes)
+
+
+def resume_game(game_id, timeout_minutes, start_delay=0):
+    """Goes on with a stopped game: the manager and the living players, from where it stopped."""
+    if STOP.wait(start_delay):
+        return ABORTED
+    game_dir = Path(DIRS_PREFIX) / game_id
+    events = [json.loads(line) for line in (game_dir / EVENTS_FILE).read_text().splitlines()]
+    living = (game_dir / REMAINING_PLAYERS_FILE).read_text().splitlines()
+    for name in living:  # the manager waits for each of them to join again
+        (game_dir / PERSONAL_STATUS_FILE_FORMAT.format(name)).write_text("")
+    update_index(game_id, winner=None, resumed=time.time())
+    # the game's clock goes on from its last event (game_time() in game_constants.py)
+    return play(game_id, living, timeout_minutes, stopped_at=events[-1]["ts"])
+
+
+def play(game_id, names, timeout_minutes, stopped_at=None):
+    """Runs the game's manager and one process per named player until the game ends."""
+    game_dir = Path(DIRS_PREFIX) / game_id
     # PYTHONUTF8: on Windows a model's first non-cp1252 character would crash its player
     environment = {**os.environ, "PYTHONUTF8": "1"}
+    if stopped_at is not None:
+        environment["LLMAFIA_CLOCK_OFFSET"] = str(time.time() - stopped_at)
 
     def start(script, *arguments, console_name):
-        console = open(game_dir / f"console_{console_name}.txt", "w")
+        # a resumed game keeps what its processes printed before it stopped
+        console = open(game_dir / f"console_{console_name}.txt", "w" if stopped_at is None else "a")
+        if stopped_at is not None:
+            console.write(f"\n===== resumed at {time.ctime()} =====\n")
+            console.flush()
         return subprocess.Popen([sys.executable, "-u", script, game_id, *arguments],
                                 env=environment, stdout=console, stderr=subprocess.STDOUT)
 
-    processes = {"manager": start("mafia_main.py", console_name="manager")}
-    for player in config[PLAYERS_KEY_IN_CONFIG]:
-        processes[player["name"]] = start("llm_interface.py", player["name"],
-                                          console_name=player["name"])
+    processes = {"manager": start("mafia_main.py", *(["--resume"] if stopped_at is not None else []),
+                                  console_name="manager")}
+    for name in names:
+        processes[name] = start("llm_interface.py", name, console_name=name)
     manager = processes["manager"]
     deadline = time.time() + timeout_minutes * 60
     problem = None
@@ -266,30 +304,48 @@ def mark_unfinished_games_aborted():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
-    parser.add_argument("table_config", help="path to the table config (json)")
+    parser.add_argument("table_config", nargs="?", help="path to the table config (json)")
+    parser.add_argument("--resume", nargs="+", metavar="GAME_ID",
+                        help="go on with these stopped games instead of starting new ones")
     parser.add_argument("-n", "--games", type=int, default=1, help="number of games to play")
     parser.add_argument("--timeout-minutes", type=float, default=DEFAULT_TIMEOUT_MINUTES,
                         help="a game that takes longer is aborted")
     parser.add_argument("-p", "--parallel", type=int, default=1,
                         help="how many games to run at the same time (each is ~9 processes, ~165 MB)")
     args = parser.parse_args()
-    table_path = Path(args.table_config).resolve()
+    if bool(args.table_config) == bool(args.resume):
+        parser.error("give either a table config or --resume with game ids")
     os.chdir(REPO_DIR)  # the game's processes find each other's files relative to the repo
-    table = json.loads(table_path.read_text())
-    validate_table(table)
-    models = [seat["model"] for seat in table[PLAYERS_KEY_IN_CONFIG]] + [get_moderator_model(table)]
+    if args.resume:
+        table = table_path = None
+        configs = [json.loads((Path(DIRS_PREFIX) / game_id / GAME_CONFIG_FILE).read_text())
+                   for game_id in args.resume]
+        models = [config.get(MODERATOR_MODEL_KEY) for config in configs] + [
+            player[LLM_CONFIG_KEY][MODEL_NAME_KEY] for config in configs
+            for player in config[PLAYERS_KEY_IN_CONFIG]]
+        args.games = len(args.resume)
+    else:
+        table_path = Path(args.table_config).resolve()
+        table = json.loads(table_path.read_text())
+        validate_table(table)
+        models = [seat["model"] for seat in table[PLAYERS_KEY_IN_CONFIG]] + [get_moderator_model(table)]
     if any(model not in (MOCK_MODEL_NAME, None, "") for model in models) \
             and not os.environ.get(OPENROUTER_API_KEY_KEYWORD):
         sys.exit(f"{OPENROUTER_API_KEY_KEYWORD} is not set")
-    if get_voice(table) and not os.environ.get(DEEPGRAM_API_KEY_KEYWORD):
+    if table and get_voice(table) and not os.environ.get(DEEPGRAM_API_KEY_KEYWORD):
         print(f"Note: {DEEPGRAM_API_KEY_KEYWORD} is not set, so the moderator will not speak",
               flush=True)
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(1))  # so that `finally` stops the games
     mark_unfinished_games_aborted()
     parallel = max(1, min(args.parallel, args.games))
     pool = ThreadPoolExecutor(parallel)
-    futures = [pool.submit(run_game, table, table_path, args.timeout_minutes,
-                           STAGGER_SECONDS * i if i < parallel else 0) for i in range(args.games)]
+    if args.resume:
+        futures = [pool.submit(resume_game, game_id, args.timeout_minutes,
+                               STAGGER_SECONDS * i if i < parallel else 0)
+                   for i, game_id in enumerate(args.resume)]
+    else:
+        futures = [pool.submit(run_game, table, table_path, args.timeout_minutes,
+                               STAGGER_SECONDS * i if i < parallel else 0) for i in range(args.games)]
     try:
         winners = [future.result() for future in futures]
     except BaseException:  # Ctrl-C or SIGTERM: every running game stops its processes

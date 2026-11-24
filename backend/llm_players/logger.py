@@ -1,7 +1,7 @@
 import json
-import time
 from pathlib import Path
-from game_constants import LLM_LOG_FILE_FORMAT, REASONING_FILE_FORMAT, get_current_timestamp
+from game_constants import LLM_LOG_FILE_FORMAT, REASONING_FILE_FORMAT, get_current_timestamp, \
+    game_time
 
 NEW_LOG_FORMAT = "# NEW LOG\n## TIME: {time}\n## OPERATION: {operation}\n## CONTENT: {content}\n\n"
 
@@ -22,5 +22,5 @@ class Logger:
         """One JSON line per LLM call: what it was for, what came out and the reasoning trace."""
         self.log(f"reasoning trace ({kind})", reasoning)
         with open(self.reasoning_file, "a") as f:
-            f.write(json.dumps({"ts": time.time(), "kind": kind, "output": output,
+            f.write(json.dumps({"ts": game_time(), "kind": kind, "output": output,
                                 "reasoning": reasoning, "usage": usage}) + "\n")

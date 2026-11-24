@@ -1,6 +1,7 @@
 import json
 import random
 import re
+import sys
 from game_constants import *  # incl. argparse, time, Path (from pathlib), colored (from termcolor)
 from moderator import Moderator, clip_seconds
 
@@ -36,7 +37,7 @@ def log_event(event_type, **data):
     # analysis. Only the manager writes it and no player process reads it, so it may hold
     # what players must not see (night actions).
     with open(game_dir / EVENTS_FILE, "a") as f:
-        f.write(json.dumps({"ts": time.time(), "type": event_type, **data}) + "\n")
+        f.write(json.dumps({"ts": game_time(), "type": event_type, **data}) + "\n")
 
 
 def moderator_line(moment, players, round_number, **facts):
@@ -49,6 +50,21 @@ def moderator_line(moment, players, round_number, **facts):
     return moderator.narrate(moment, round=round_number,
                              alive=", ".join(player.name for player in players),
                              out_so_far="; ".join(public_history) or "nobody", **facts)
+
+
+def note_out(name, role, is_night, round_number):
+    """Adds an elimination to what everyone knows. Returns how it happened, for the moderator."""
+    how = "killed by the mafia during the night" if is_night else "voted out by the town"
+    public_history.append(f"{name} ({role}), {how} in round {round_number}")
+    return how
+
+
+def note_saved(round_number):
+    public_history.append(f"night {round_number}: nobody died")
+
+
+def note_tie(round_number):
+    public_history.append(f"day {round_number}: the vote was tied, nobody was voted out")
 
 
 def log_narration(line, moment):
@@ -258,15 +274,17 @@ def storyteller_choice(question, options, players, round_number):
 
 
 def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_chat_file, players,
-                     round_number, unheard=None):
+                     round_number, unheard=None, resumed=False):
     """unheard: a moderator line just said with no discussion after it (a night with one mafia
-    player), heard out here, once the vote is open and nobody can talk, before the questions."""
-    notify_players_about_voting_time(phase_name, public_chat_file)
-    log_event("vote_open", phase=PHASE_EVENT_NAMES[phase_name], round=round_number)
-    # A player may have sent a message just before seeing the voting status. Relay it now:
-    # left unread, it would surface at the start of a later phase.
-    time.sleep(POLL_SECONDS)
-    run_chat_round_between_players(voting_players, public_chat_file, phase_name)
+    player), heard out here, once the vote is open and nobody can talk, before the questions.
+    resumed: the game stopped with this vote open and no vote counted, so it is open already."""
+    if not resumed:
+        notify_players_about_voting_time(phase_name, public_chat_file)
+        log_event("vote_open", phase=PHASE_EVENT_NAMES[phase_name], round=round_number)
+        # A player may have sent a message just before seeing the voting status. Relay it now:
+        # left unread, it would surface at the start of a later phase.
+        time.sleep(POLL_SECONDS)
+        run_chat_round_between_players(voting_players, public_chat_file, phase_name)
     moment = "vote_open" if phase_name == DAYTIME else "ask_mafia"
     line = moderator_line(moment, players, round_number)
     if phase_name == NIGHTTIME:
@@ -281,7 +299,7 @@ def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_
     if voted_out_name is None:
         game_manager_announcement(TIED_VOTE_MESSAGE)
         log_event("tie", round=round_number)
-        public_history.append(f"day {round_number}: the vote was tied, nobody was voted out")
+        note_tie(round_number)
         log_narration(moderator_line("tie", players, round_number), "tie")
         return
     if phase_name == NIGHTTIME:
@@ -289,7 +307,7 @@ def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_
     if phase_name == NIGHTTIME and run_night_roles(players, round_number) == voted_out_name:
         game_manager_announcement(NOBODY_ELIMINATED_MESSAGE)
         log_event("saved", name=voted_out_name)
-        public_history.append(f"night {round_number}: nobody died")
+        note_saved(round_number)
         log_narration(moderator_line("saved", players, round_number), "saved")
         return
     # update info file of remaining players
@@ -301,9 +319,7 @@ def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_
     voted_out_player.eliminate()
     players.remove(voted_out_player)
     announce_voted_out_player(voted_out_player, phase_name)
-    how = "killed by the mafia during the night" if phase_name == NIGHTTIME else "voted out by the town"
-    public_history.append(f"{voted_out_player.name} ({voted_out_player.role}), {how} "
-                          f"in round {round_number}")
+    how = note_out(voted_out_player.name, voted_out_player.role, phase_name == NIGHTTIME, round_number)
     log_narration(moderator_line("eliminated", players, round_number, name=voted_out_player.name,
                                  role=voted_out_player.role, how=how), "eliminated")
 
@@ -325,13 +341,19 @@ def announce_voted_out_player(voted_out_player, phase_name):
 
 
 def run_phase(players, voting_players, optional_votes_players, public_chat_file,
-              time_limit_seconds, phase_name, round_number, opening=None):
+              time_limit_seconds, phase_name, round_number, opening=None, played=None,
+              at_vote=False):
+    """played: in a resumed game, the seconds of this phase's discussion played before it
+    stopped (None for a phase that starts now). at_vote: it stopped with the vote open."""
     is_discussion = len(voting_players) > 1
-    log_event("phase", phase=PHASE_EVENT_NAMES[phase_name], round=round_number,
-              duration=time_limit_seconds if is_discussion else 0)
-    log_narration(opening, PHASE_EVENT_NAMES[phase_name] + "_start")
-    if is_discussion:
-        start_time = time.time()
+    if played is None:
+        log_event("phase", phase=PHASE_EVENT_NAMES[phase_name], round=round_number,
+                  duration=time_limit_seconds if is_discussion else 0)
+        log_narration(opening, PHASE_EVENT_NAMES[phase_name] + "_start")
+    if at_vote:
+        pass
+    elif is_discussion:
+        start_time = time.time() - (played or 0)
         while time.time() - start_time < time_limit_seconds:
             run_chat_round_between_players(voting_players, public_chat_file, phase_name)
             time.sleep(POLL_SECONDS)
@@ -339,28 +361,32 @@ def run_phase(players, voting_players, optional_votes_players, public_chat_file,
         game_manager_announcement(CUTTING_TO_VOTE_MESSAGE)
     print("Now voting starts...")
     voting_sub_phase(phase_name, voting_players, optional_votes_players, public_chat_file, players,
-                     round_number, None if is_discussion else opening)
+                     round_number, None if is_discussion else opening, at_vote)
 
 
-def run_nighttime(players, nighttime_minutes, round_number, opening=None):
-    (game_dir / PHASE_STATUS_FILE).write_text(NIGHTTIME)
+def run_nighttime(players, nighttime_minutes, round_number, opening=None, played=None,
+                  at_vote=False):
     mafia_players = [player for player in players if player.is_mafia]
     bystanders = [player for player in players if not player.is_mafia]
-    print(colored(NIGHTTIME_START_MESSAGE_FORMAT.format(nighttime_minutes), NIGHTTIME_COLOR))
-    game_manager_announcement(NIGHTTIME_START_MESSAGE_FORMAT.format(nighttime_minutes))
+    if played is None:  # a resumed phase has started already
+        (game_dir / PHASE_STATUS_FILE).write_text(NIGHTTIME)
+        print(colored(NIGHTTIME_START_MESSAGE_FORMAT.format(nighttime_minutes), NIGHTTIME_COLOR))
+        game_manager_announcement(NIGHTTIME_START_MESSAGE_FORMAT.format(nighttime_minutes))
     run_phase(players, mafia_players, bystanders, game_dir / PUBLIC_NIGHTTIME_CHAT_FILE,
-              minutes_to_seconds(nighttime_minutes), NIGHTTIME, round_number, opening)
+              minutes_to_seconds(nighttime_minutes), NIGHTTIME, round_number, opening, played,
+              at_vote)
 
 
-def run_daytime(players, daytime_minutes, round_number, opening=None):
-    (game_dir / PHASE_STATUS_FILE).write_text(DAYTIME)
-    print(colored(DAYTIME_START_MESSAGE_FORMAT.format(daytime_minutes), DAYTIME_COLOR))
-    game_manager_announcement(DAYTIME_START_MESSAGE_FORMAT.format(daytime_minutes))
+def run_daytime(players, daytime_minutes, round_number, opening=None, played=None, at_vote=False):
+    if played is None:  # a resumed phase has started already
+        (game_dir / PHASE_STATUS_FILE).write_text(DAYTIME)
+        print(colored(DAYTIME_START_MESSAGE_FORMAT.format(daytime_minutes), DAYTIME_COLOR))
+        game_manager_announcement(DAYTIME_START_MESSAGE_FORMAT.format(daytime_minutes))
     run_phase(players, players, players, game_dir / PUBLIC_DAYTIME_CHAT_FILE,
-              minutes_to_seconds(daytime_minutes), DAYTIME, round_number, opening)
+              minutes_to_seconds(daytime_minutes), DAYTIME, round_number, opening, played, at_vote)
 
 
-def wait_for_players(players):
+def wait_for_players(players, is_resumed=False):
     havent_joined_yet = [player for player in players]
     print("Waiting for all players to connect and start running their programs to join:")
     print(",  ".join([player.name for player in havent_joined_yet]))
@@ -373,7 +399,8 @@ def wait_for_players(players):
         for player in joined:
             havent_joined_yet.remove(player)
         time.sleep(POLL_SECONDS)
-    (game_dir / GAME_START_TIME_FILE).write_text(get_current_timestamp())
+    if not is_resumed:
+        (game_dir / GAME_START_TIME_FILE).write_text(get_current_timestamp())
     print("Game is now running! Its content is displayed to players.")
 
 
@@ -393,9 +420,56 @@ def end_game(players, round_number):
     print("Game has finished.")
 
 
+def restore(players, phase_order):
+    """
+    --resume: rebuilds the manager's state from events.jsonl (who is out, what everyone knows,
+    whether the detective's false answer was given) and returns where the game goes on:
+    (step, played, at_vote). step counts the phases from 0. played is the seconds of that phase's
+    discussion played before the game stopped, or None when the phase starts afresh; at_vote
+    says the game stopped with the phase's vote open. The players' processes rebuild their own
+    state from the chat files, and only lines added from now on get relayed.
+    """
+    global detective_misled
+    events = [json.loads(line) for line in (game_dir / EVENTS_FILE).read_text().splitlines()]
+    if any(event["type"] == "game_over" for event in events):
+        sys.exit("This game is over already, nothing to resume")
+    by_name = {player.name: player for player in players}
+    phase, since_phase = None, []
+    for event in events:
+        kind = event["type"]
+        if kind == "phase":
+            phase, since_phase = event, []
+            continue
+        since_phase.append(event)
+        if kind == "eliminated":
+            players.remove(by_name[event["name"]])
+            note_out(event["name"], event["role"], event["cause"] == "night", phase["round"])
+        elif kind == "saved":
+            note_saved(phase["round"])
+        elif kind == "tie":
+            note_tie(phase["round"])
+        elif kind == "investigate" and event.get("misled") and \
+                by_name[event["detective"]].special_role == DETECTIVE_ROLE:
+            detective_misled = True
+    if phase is None:
+        sys.exit("The game stopped before its first phase: start a new game instead")
+    for player in by_name.values():  # what is there was relayed already (or arrived as it stopped)
+        player.get_new_messages()  # skips them
+        player.personal_vote_file_lines_read = len(player.personal_vote_file.read_text().splitlines())
+    step = (phase["round"] - 1) * 2 + phase_order.index(phase["phase"])
+    kinds = {event["type"] for event in since_phase}
+    if kinds & {"eliminated", "saved", "tie"}:  # the phase ended: the next one starts afresh
+        return step + 1, None, False
+    if kinds & {"vote", "protect", "investigate"}:
+        sys.exit("The game stopped while votes were being counted, it can't be resumed")
+    played = max(event["ts"] for event in [phase, *since_phase]) - phase["ts"]
+    return step, played, "vote_open" in kinds
+
+
 def main():
     global game_dir, moderator, night_pacing, misinformation
     game_dir = get_game_dir_from_argv()
+    is_resumed = "--resume" in sys.argv  # run_autonomous.py --resume: go on with a stopped game
     config = get_config()
     players = get_players(config)
     if config.get(MODERATOR_MODEL_KEY):
@@ -406,29 +480,33 @@ def main():
     # Daytime: the first discussion then has a night's result to work with, and nobody votes
     # before anyone has died.
     is_night_first = config.get(NIGHT_FIRST_KEY, False)
-    first, second = (run_nighttime, run_daytime) if is_night_first else (run_daytime, run_nighttime)
-    first_minutes, second_minutes = (
-        (config[NIGHTTIME_MINUTES_KEY], config[DAYTIME_MINUTES_KEY]) if is_night_first
-        else (config[DAYTIME_MINUTES_KEY], config[NIGHTTIME_MINUTES_KEY]))
-    first_moment, second_moment = ("night_start", "day_start") if is_night_first \
-        else ("day_start", "night_start")
-    if is_night_first:  # before anyone joins: no town player may talk in the first moments
-        (game_dir / PHASE_STATUS_FILE).write_text(NIGHTTIME)
-    round_number = 1
-    # Each opening line is asked for before its phase starts: here while the players are still
-    # joining, later while they wait for the last vote to close.
-    opening = moderator_line("first_night" if is_night_first else "first_day", players, round_number)
-    wait_for_players(players)
-    while True:
-        first(players, first_minutes, round_number, opening)
-        if is_game_over(players):
-            break
-        second(players, second_minutes, round_number,
-               moderator_line(second_moment, players, round_number))
-        if is_game_over(players):
-            break
-        round_number += 1
-        opening = moderator_line(first_moment, players, round_number)
+    phases = [(run_nighttime, NIGHTTIME_MINUTES_KEY, "night"), (run_daytime, DAYTIME_MINUTES_KEY, "day")]
+    if not is_night_first:
+        phases.reverse()
+    step, opening = 0, None
+    if is_resumed:
+        step, played, at_vote = restore(players, [name for *_, name in phases])
+        wait_for_players(players, is_resumed=True)
+        log_event("resumed", real_ts=time.time())  # the events' ts follow the game's own clock
+        if played is not None and not is_game_over(players):
+            run, minutes_key, _ = phases[step % 2]
+            run(players, config[minutes_key], step // 2 + 1, played=played, at_vote=at_vote)
+            step += 1
+    else:
+        if is_night_first:  # before anyone joins: no town player may talk in the first moments
+            (game_dir / PHASE_STATUS_FILE).write_text(NIGHTTIME)
+        # Each opening line is asked for before its phase starts: here while the players are
+        # still joining, later while they wait for the last vote to close.
+        opening = moderator_line("first_night" if is_night_first else "first_day", players, 1)
+        wait_for_players(players)
+    round_number = step // 2 + 1
+    while not is_game_over(players):
+        run, minutes_key, name = phases[step % 2]
+        round_number = step // 2 + 1
+        if step or is_resumed:
+            opening = moderator_line(name + "_start", players, round_number)
+        run(players, config[minutes_key], round_number, opening)
+        step += 1
     end_game(players, round_number)
 
 
