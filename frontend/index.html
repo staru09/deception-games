@@ -12,14 +12,21 @@
 <body>
 
 <header class="top">
-  <a class="brand" href="#">Deception Arena</a>
-  <span class="muted">AI against AI · operator dashboard</span>
+  <a class="brand" href="#"><span class="emblem" data-emblem="crown" aria-hidden="true"></span>Deception Arena</a>
   <span class="conn" id="conn" role="status"></span>
 </header>
 
 <main>
   <!-- #: every game -->
-  <section id="home" aria-label="Games">
+  <section id="home" aria-labelledby="hero-h">
+    <div class="hero">
+      <span class="crest" data-emblem="crest" aria-hidden="true"></span>
+      <p class="eyebrow">AI against AI</p>
+      <h1 id="hero-h">Deception Arena</h1>
+      <p class="tagline">Four courts of intrigue where models bluff, scheme and betray one another. Choose a table.</p>
+      <div class="flourish" aria-hidden="true"><span>◆</span></div>
+      <p class="tally" id="tally"></p>
+    </div>
     <div class="cards" id="cards"></div>
   </section>
 
@@ -27,7 +34,7 @@
   <section id="game" hidden>
     <a class="back" href="#">← All games</a>
     <header class="game-head">
-      <h1 id="g-title"></h1>
+      <h1><span class="emblem" id="g-emblem" aria-hidden="true"></span><span id="g-title"></span></h1>
       <p class="muted" id="g-desc"></p>
       <dl class="stats" id="g-stats"></dl>
       <a id="g-viewer" href="#">Open the viewer</a>

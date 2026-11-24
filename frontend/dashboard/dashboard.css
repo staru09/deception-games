@@ -1,35 +1,175 @@
-/* The dashboard (../index.html): game cards, one game's runs, the New run panel and the
-   launchers. Colours and fonts are the tokens of common/arena.css (dark, and light by preference). */
+/* The dashboard (../index.html), dressed as a royal court: velvet and gold, and each game a court
+   card (rank and suit in its corners, an emblem in a gold medallion). The base tokens come from
+   common/arena.css; the court's own colours are defined here, dark and (by preference) light. */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+
+:root {
+  --velvet: #4a0f22;
+  --royal: #23123f;
+  --gold: #e3b95f;
+  --gold-hi: #f8e2a6;
+  --gold-lo: #9a6f22;
+  --gold-line: rgba(227, 185, 95, 0.32);
+  --card: linear-gradient(165deg, #1a1428 0%, #120e1d 55%, #0d0a16 100%);
+  --ink-on-gold: #1a1206;
+  --deco: 'Cinzel Decorative', var(--head);
+  /* one accent per court */
+  --mafia: #d6455a;
+  --misinformation: #9b7cf4;
+  --senate: #4fb985;
+  --poker: #5b8ee6;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --velvet: #f1dfe0;
+    --royal: #e9e1f2;
+    --gold: #8f6514;
+    --gold-hi: #b98a2c;
+    --gold-lo: #6b4a0c;
+    --gold-line: rgba(143, 101, 20, 0.35);
+    --card: linear-gradient(165deg, #fffdf7 0%, #fbf4e6 60%, #f5ead3 100%);
+    --ink-on-gold: #fffaf0;
+    --mafia: #b3263b;
+    --misinformation: #6a48cf;
+    --senate: #1f7d51;
+    --poker: #2f62bd;
+  }
+}
+
+body {
+  background:
+    radial-gradient(1200px 520px at 50% -160px, color-mix(in srgb, var(--velvet) 85%, transparent), transparent 70%),
+    radial-gradient(900px 700px at 0% 100%, color-mix(in srgb, var(--royal) 70%, transparent), transparent 65%),
+    radial-gradient(900px 700px at 100% 100%, color-mix(in srgb, var(--royal) 55%, transparent), transparent 65%),
+    var(--bg);
+  background-attachment: fixed;
+}
 
 .top, main { max-width: 1240px; margin: 0 auto; padding-inline: 16px; }
-.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding-block: 18px 8px; }
-.brand { font: 700 20px var(--head); letter-spacing: 0.08em; color: var(--gold); text-decoration: none; }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding-block: 16px 6px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font: 700 18px var(--head); letter-spacing: 0.1em; color: var(--gold); text-decoration: none; }
+.brand .emblem { width: 26px; height: 26px; }
+body[data-route="home"] .brand { visibility: hidden; }   /* the hero carries the title */
 .conn { margin-left: auto; color: var(--bad); font-size: 13px; }
-main { display: grid; gap: 16px; padding-bottom: 40px; }
+main { display: grid; gap: 18px; padding-bottom: 48px; }
 p { margin: 0; }
 .muted { color: var(--muted); }
 .small { font-size: 12.5px; }
 .mono { font-family: var(--mono); }
+.emblem, .crest, .medal { display: inline-grid; place-items: center; color: var(--gold); }
+.emblem svg, .crest svg, .medal svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ---------- cards ---------- */
-.cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-.card { display: grid; align-content: start; gap: 10px; padding: 16px; color: inherit; text-decoration: none; transition: border-color 0.15s; }
-.card:hover { border-color: var(--line-strong); }
-.card h2 { font-size: 19px; color: var(--gold); }
+/* ---------- hero ---------- */
+.hero { display: grid; justify-items: center; gap: 10px; padding: 8px 0 34px; text-align: center; }
+.crest { width: 132px; height: 110px; filter: drop-shadow(0 4px 18px color-mix(in srgb, var(--gold) 35%, transparent)); }
+.crest svg { stroke-width: 2; }
+.crest ellipse { fill: currentColor; fill-opacity: 0.55; stroke-width: 1.2; }   /* laurel leaves */
+.eyebrow { font: 600 12px var(--body); letter-spacing: 0.42em; text-transform: uppercase; color: var(--gold); padding-left: 0.42em; }
+.hero h1 {
+  font: 700 clamp(36px, 7.4vw, 76px)/1.05 var(--deco);
+  letter-spacing: 0.02em;
+  background: linear-gradient(180deg, var(--gold-hi) 10%, var(--gold) 55%, var(--gold-lo) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 2px 30px color-mix(in srgb, var(--gold) 18%, transparent);
+  overflow-wrap: anywhere;
+}
+.tagline { max-width: 560px; font-size: 16px; color: var(--muted); }
+.flourish { display: flex; align-items: center; gap: 12px; width: min(420px, 80vw); color: var(--gold); font-size: 11px; }
+.flourish::before, .flourish::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+.flourish::after { transform: scaleX(-1); }
+.tally { font: 600 12.5px var(--body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.tally b { color: var(--gold); font: 700 15px var(--head); letter-spacing: 0.04em; }
+
+/* ---------- court cards ---------- */
+.cards { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); }
+.card {
+  --accent: var(--gold);
+  position: relative; isolation: isolate;
+  display: grid; justify-items: center; align-content: start; gap: 12px;
+  min-height: 420px; padding: 46px 24px 64px; text-align: center;   /* the bottom clears the corner pip */
+  color: inherit; text-decoration: none;
+  background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%), var(--card);
+  border: 1px solid var(--gold-line); border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card[data-game="mafia"] { --accent: var(--mafia); }
+.card[data-game="misinformation"] { --accent: var(--misinformation); }
+.card[data-game="senate"] { --accent: var(--senate); }
+.card[data-game="poker"] { --accent: var(--poker); }
+/* the inner gold frame of a playing card */
+.card::before {
+  content: ''; position: absolute; inset: 9px; z-index: -1; pointer-events: none;
+  border: 1px solid var(--gold-line); border-radius: 12px;
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.card:hover, .card:focus-visible {
+  transform: translateY(-6px);
+  border-color: var(--gold);
+  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--gold), 0 0 34px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.pip { position: absolute; display: grid; justify-items: center; line-height: 1; color: var(--accent); }
+.pip b { font: 700 22px var(--head); }
+.pip i { font-style: normal; font-size: 18px; }
+.pip.tl { top: 18px; left: 20px; }
+.pip.br { bottom: 18px; right: 20px; transform: rotate(180deg); }
+.medal {
+  width: 112px; height: 112px; padding: 24px; margin-bottom: 4px; border-radius: 50%;
+  color: var(--accent);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--gold) 14%, transparent), inset 0 0 18px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.card h2 { font: 700 21px/1.2 var(--head); letter-spacing: 0.05em; color: var(--gold); }
+.card .desc { color: var(--muted); font-size: 13.5px; max-width: 30ch; }
+.card .stats { justify-content: center; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--gold-line); width: 100%; }
+.card .stats dd { color: var(--text); }
+.enter {
+  margin-top: 6px; padding: 7px 16px; border: 1px solid var(--gold); border-radius: 999px;
+  font: 600 11.5px var(--body); letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
+  transition: background 0.2s, color 0.2s;
+}
+.card:hover .enter, .card:focus-visible .enter { background: var(--gold); color: var(--ink-on-gold); }
+.live-tag {
+  position: absolute; top: 18px; right: 18px; padding: 2px 10px; border-radius: 999px;
+  font: 700 11px var(--body); letter-spacing: 0.1em; text-transform: uppercase;
+  color: #fff; background: var(--bad); box-shadow: 0 0 0 0 var(--bad); animation: pulse 2s infinite;
+}
+@keyframes pulse { 70% { box-shadow: 0 0 0 8px transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .card, .enter { transition: none; }
+  .card:hover, .card:focus-visible { transform: none; }
+  .live-tag { animation: none; }
+}
+@media (max-width: 560px) {
+  .cards { gap: 16px; }
+  .card { min-height: 0; padding-top: 50px; padding-bottom: 62px; }
+}
+
 .stats { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; }
 .stats div { display: grid; }
-.stats dt { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.stats dt { font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .stats dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
 .stats .hot { color: var(--bad); }
 
 /* ---------- one game ---------- */
+.glass { border-color: var(--gold-line); }
+#game { --accent: var(--gold); }
+#game[data-game="mafia"] { --accent: var(--mafia); }
+#game[data-game="misinformation"] { --accent: var(--misinformation); }
+#game[data-game="senate"] { --accent: var(--senate); }
+#game[data-game="poker"] { --accent: var(--poker); }
 .back { display: inline-block; margin-bottom: 8px; text-decoration: none; }
 .game-head { display: grid; gap: 8px; margin-bottom: 16px; }
-.game-head h1 { font-size: 26px; color: var(--gold); }
+.game-head h1 { display: flex; align-items: center; gap: 14px; font: 700 clamp(24px, 4vw, 34px) var(--head); letter-spacing: 0.04em; color: var(--gold); }
+.game-head .emblem {
+  width: 54px; height: 54px; padding: 10px; flex: none; border-radius: 50%; color: var(--accent);
+  border: 2px solid var(--gold); background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
 .cols { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); align-items: start; }
 @media (max-width: 960px) { .cols { grid-template-columns: minmax(0, 1fr); } }
 .panel { padding: 14px 16px; min-width: 0; }
-.panel h2 { font-size: 16px; margin-bottom: 10px; }
+.panel h2 { font: 700 16px var(--head); letter-spacing: 0.06em; color: var(--gold); margin-bottom: 10px; }
 .panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
 .inline { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
 
@@ -46,7 +186,7 @@ td.models { min-width: 190px; white-space: normal; font: 12px var(--mono); }
 /* ---------- forms ---------- */
 .btn { height: 34px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 9px; background: transparent; cursor: pointer; }
 .btn:hover { background: var(--line); }
-.btn.primary { background: var(--gold); border-color: var(--gold); color: var(--panel-solid); font-weight: 600; }
+.btn.primary { background: linear-gradient(180deg, var(--gold-hi), var(--gold)); border-color: var(--gold); color: var(--ink-on-gold); font-weight: 600; letter-spacing: 0.04em; }
 .btn.danger { color: var(--bad); border-color: var(--bad); }
 .btn:disabled { opacity: 0.5; cursor: progress; }
 input, select { height: 34px; min-width: 0; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel-solid); }
@@ -72,7 +212,7 @@ input[type="checkbox"] { height: auto; accent-color: var(--gold); }
 .launcher-head .btn { margin-left: auto; }
 .log { margin: 8px 0 0; padding: 8px 10px; overflow: auto; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 
-.confirm { width: min(480px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel-solid); color: var(--text); }
+.confirm { width: min(480px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--gold-line); border-radius: var(--radius); background: var(--panel-solid); color: var(--text); }
 .confirm::backdrop { background: rgba(0, 0, 0, 0.55); }
-.confirm h2 { font-size: 18px; margin-bottom: 10px; }
+.confirm h2 { font: 700 18px var(--head); color: var(--gold); margin-bottom: 10px; }
 .confirm ul { margin: 10px 0; padding-left: 18px; }
