@@ -10,3 +10,4 @@ frontend/mafia/fixtures/games/
 backend/senate_games/
 backend/poker_games/
 backend/launches/
+backend/configurations/*/dashboard/

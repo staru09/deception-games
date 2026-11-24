@@ -42,10 +42,11 @@ class Agent:
 
 
 def llm_config_for(seat, table):
-    """A seat's llm_config: its model, the table's "llm_defaults", then the seat's other keys
-    (temperature, max_tokens, reasoning, provider, ...), as in Mafia's run_autonomous.py."""
+    """A seat's llm_config: the table's "llm_defaults", then the seat's other keys (temperature,
+    max_tokens, reasoning, provider, ...), as in Mafia's run_autonomous.py, then its model. The
+    model goes last: a stray "model_name" must never turn a mock seat into a paid one."""
     extra = {key: value for key, value in seat.items() if key not in ("role", "model")}
-    return {MODEL_NAME_KEY: seat["model"], **table.get("llm_defaults", {}), **extra}
+    return {**table.get("llm_defaults", {}), **extra, MODEL_NAME_KEY: seat["model"]}
 
 
 def model_problem(seat, i):

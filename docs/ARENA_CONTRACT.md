@@ -19,13 +19,13 @@ backend/
   autonomous_games/ Mafia + Misinformation Mafia data ($LLMAFIA_GAMES_DIR)
   senate_games/     Senate data   ($SENATE_GAMES_DIR)
   poker_games/      Poker data    ($POKER_GAMES_DIR)
-  launches/         the dashboard's launcher logs
+  launches/         the dashboard's launch records and launcher logs ($ARENA_LAUNCHES_DIR)
   server.py         viewer pages, game data, the API
 frontend/
   index.html        the dashboard
   common/           arena.css (tokens, base, replay controls), replay.js
-  mafia/            the 3D village viewer (unchanged, moved here)
-  misinformation/   entry page that reuses ../mafia/ with data-variant="misinformation"
+  mafia/            the 3D village viewer; the server also serves its index.html at /misinformation/,
+                    where main.js sets data-variant="misinformation" from the URL path
   senate/  poker/   the 2D viewers
 ```
 
@@ -113,11 +113,13 @@ draws new names; `shuffle_roles` also reassigns roles among the seats.
 - Vote: all living players vote Aye/Nay at once; strict majority of Ayes passes.
 - Failed vote: tracker +1. At 3: the top law is enacted (`by: "chaos"`), no power, tracker back
   to 0, term limits cleared.
-- Passed vote: tracker back to 0. If 3+ decrees are enacted and the Prefect is the usurper, the
-  Conspiracy wins at once (`usurper_elected`), before any draw. Otherwise the Consul draws 3,
-  discards 1; the Prefect gets the other 2. With 5 decrees enacted the Prefect may propose a veto;
-  if the Consul accepts, both laws are discarded and tracker +1 (3 → chaos); if not, the Prefect
-  must enact. The Prefect discards 1 and enacts the other.
+- Passed vote: the tracker stays as it is (only an enacted law resets it). If 3+ decrees are
+  enacted and the Prefect is the usurper, the Conspiracy wins at once (`usurper_elected`), before
+  any draw. Otherwise the Consul draws 3, discards 1; the Prefect gets the other 2. With 5 decrees
+  enacted the Prefect may propose a veto; if the Consul accepts, both laws are discarded (no
+  `discard` events: the `veto` event says so) and tracker +1 (3 → chaos); if not, the Prefect
+  must enact. The Prefect discards 1 and enacts the other. Any enacted law, chaos included, sets
+  the tracker back to 0.
 - Powers come only from a law the government enacted, by the decree count reached:
   5–6 players: peek (3), execution (4), execution (5);
   7–8: investigate (2), special election (3), execution (4, 5);
@@ -142,9 +144,9 @@ draws new names; `shuffle_roles` also reassigns roles among the seats.
 | `nominate` | consul, prefect |
 | `message` | name, text, stage: `"debate"` (before the vote) \| `"report"` (after a law) |
 | `vote` | voter, aye (bool); one per living voter, all written after everyone voted |
-| `vote_result` | passed, ayes, nays, tracker |
+| `vote_result` | passed, ayes, nays, tracker (after this vote: unchanged when passed, 3 on the failure that brings chaos) |
 | `draw` S | consul, laws: 3 × `"reform"`\|`"decree"` |
-| `discard` S | by, law (the Consul's, then the Prefect's) |
+| `discard` S | by, law (the Consul's, then the Prefect's; none for laws an accepted veto discards) |
 | `veto` | prefect, consul, accepted (bool), tracker; only when the Prefect proposes one |
 | `enact` | law, by: Prefect name \| `"chaos"`, reforms, decrees, tracker (all after enacting) |
 | `reshuffle` | draw_pile |
@@ -221,19 +223,25 @@ Index `winner`: the player name with the higher total, or `"draw"`.
 | `/` | `frontend/index.html` (dashboard); other paths under `frontend/` as files |
 | `/<game>/games/<path>` | that game's data dir; mafia and misinformation share `autonomous_games` |
 | `/mafia/games/index.json`, `/misinformation/games/index.json` | `autonomous_games/index.json` filtered by each game's `config.json` `variant` (none → mafia, `"misinformation"` → misinformation), cached by mtime |
-| `GET /api/games` | per game: title, one-line description, sides, runs, live, wins, run list |
+| `GET /api/games` | per game key: title, description, sides, roles (for the seat editor), default_moderator (Mafia games), runs, live, wins (per side; poker: per model), avg_cost (mean USD of finished runs with a real model, or null), list (the index entries) |
 | `GET /api/tables?game=` | saved tables (Mafia's own by variant) |
 | `GET /api/models` | `configurations/models.json` |
 | `GET /api/budget` | OpenRouter `GET /api/v1/key` (limit, usage, remaining); notes the workspace budget can't be read |
-| `GET /api/launches` | launchers this server started: pid, game, started, running, last log lines |
+| `GET /api/launches` | recorded launches: pid, game, started, running, exit code (null while running, a number, or "unknown" if it ended while the server was down), last log lines |
 | `POST /api/launch` | `{game, table, games, parallel}`: validate, save the table, spawn the launcher |
-| `POST /api/stop` | `{pid}`: SIGTERM a launcher this server started |
+| `POST /api/stop` | `{pid}`: SIGTERM a recorded launcher that is still running |
 
 Launchers (cwd `backend/`, the server's own environment, output to `backend/launches/<ts>_<game>.log`):
 mafia / misinformation → `python run_autonomous.py <table> --games N --parallel P`;
 senate / poker → `python -m arena.run <game> <table> --games N --parallel P`.
-At most one running launcher per data dir (mafia and misinformation count as one).
+At most one running launcher per data dir (mafia and misinformation count as one). A table that
+sets "model_name", "use_openrouter" or "use_mock" in llm_defaults or a seat is refused (only a
+seat's "model" picks its model). Launchers run in their own session and each launch is recorded
+in `backend/launches/`; a recorded launch counts as running while its pid lives and
+/proc/<pid>/cmdline still matches its argv, so a restarted server (a deploy) still lists, refuses
+duplicates of and stops runs started before the restart. Ctrl-C on the server leaves them running.
 
-POST safety: only `Content-Type: application/json`, header `X-Arena: 1`, and an `Origin` equal to
-`http://` + the request's `Host`; no CORS headers, ever. The key comes only from the server's
+Every request: the `Host` must be 127.0.0.1, localhost, ::1 or the `--host` name (against DNS
+rebinding). POST safety: only `Content-Type: application/json`, header `X-Arena: 1`, and an
+`Origin` equal to `http://` + the request's `Host`; no CORS headers, ever. The key comes only from the server's
 environment and never reaches a page.

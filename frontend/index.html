@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Arena</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="common/arena.css">
+<link rel="stylesheet" href="dashboard/dashboard.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#">Deception Arena</a>
+  <span class="muted">AI against AI · operator dashboard</span>
+  <span class="conn" id="conn" role="status"></span>
+</header>
+
+<main>
+  <!-- #: every game -->
+  <section id="home" aria-label="Games">
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <!-- #<game>: one game's runs and the New run panel -->
+  <section id="game" hidden>
+    <a class="back" href="#">← All games</a>
+    <header class="game-head">
+      <h1 id="g-title"></h1>
+      <p class="muted" id="g-desc"></p>
+      <dl class="stats" id="g-stats"></dl>
+      <a id="g-viewer" href="#">Open the viewer</a>
+    </header>
+    <div class="cols">
+      <section class="glass panel" aria-labelledby="runs-h">
+        <div class="panel-head">
+          <h2 id="runs-h">Runs</h2>
+          <label class="inline">Status
+            <select id="filter">
+              <option value="all">all</option><option value="live">live</option>
+              <option value="finished">finished</option><option value="aborted">aborted</option>
+            </select>
+          </label>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead><tr><th scope="col">ID</th><th scope="col">Date</th><th scope="col">Models</th>
+              <th scope="col">Status</th><th scope="col">Winner</th><th scope="col"><span class="sr">Viewer</span></th></tr></thead>
+            <tbody id="runs"></tbody>
+          </table>
+        </div>
+        <p class="muted" id="runs-empty" hidden>No runs with this status.</p>
+      </section>
+
+      <section class="glass panel" aria-labelledby="nr-h">
+        <h2 id="nr-h">New run</h2>
+        <label class="field">Start from a saved table <select id="nr-table"></select></label>
+        <div class="seats" id="nr-seats" role="group" aria-label="Seats"></div>
+        <button type="button" class="btn" id="nr-add">Add seat</button>
+        <div class="row" id="nr-options"></div>
+        <div class="row">
+          <label class="field">Games <input id="nr-games" type="number" min="1" max="50" value="1" inputmode="numeric"></label>
+          <label class="field">Parallel <input id="nr-parallel" type="number" min="1" max="8" value="1" inputmode="numeric"></label>
+        </div>
+        <p id="nr-estimate"></p>
+        <p class="muted small" id="nr-budget"></p>
+        <button type="button" class="btn primary" id="nr-start">Start</button>
+        <p class="status" id="nr-status" role="status"></p>
+      </section>
+    </div>
+  </section>
+
+  <section class="glass panel" aria-labelledby="launchers-h">
+    <h2 id="launchers-h">Launchers</h2>
+    <div class="launchers" id="launchers"></div>
+  </section>
+</main>
+
+<dialog class="confirm" id="confirm" aria-labelledby="confirm-h">
+  <form method="dialog">
+    <h2 id="confirm-h">Start a paid run?</h2>
+    <p id="confirm-text"></p>
+    <ul class="mono small" id="confirm-models"></ul>
+    <div class="row end">
+      <button class="btn" value="cancel" autofocus>Cancel</button>
+      <button class="btn primary" value="start">Start paid run</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="dashboard/dashboard.js"></script>
+</body>
+</html>

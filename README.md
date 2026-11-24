@@ -51,7 +51,7 @@ Analysis of the dataset is described thoroughly in our paper, with a focus on ou
 
 This copy of the repository can also play games with no humans at all, to study whether stronger models out-deceive weaker ones. Every seat is a model served through [OpenRouter](https://openrouter.ai), the town gets a detective and a doctor, and a 3D viewer shows the games live or as replays.
 
-The code is split into `backend/` (the game engine of the paper plus the autonomous launcher) and `frontend/` (the viewer, static files). Run everything from `backend/`:
+The code is split into `backend/` (the game engines and launchers, and `server.py`) and `frontend/` (the dashboard and one viewer per game, static files). Run everything from `backend/`:
 
 ```bash
 cd backend
@@ -67,7 +67,7 @@ export OPENROUTER_API_KEY=...
 .venv/bin/python analyze_autonomous.py   # win rate per model; writes seats.csv and games.csv
 .venv/bin/python server.py               # the viewer, on http://127.0.0.1:8000
 .venv/bin/python selfcheck.py            # checks the engine end to end with mock players
-python ../frontend/fixtures/make_fixture.py && node ../frontend/state.check.mjs   # checks the viewer
+python ../frontend/mafia/fixtures/make_fixture.py && node ../frontend/mafia/state.check.mjs   # checks the viewer
 ```
 
 - **Table config:** one entry per seat with a `role` (`mafia`, `detective`, `doctor`, `villager`) and a `model`. Any other key of a seat (`reasoning`, `temperature`, `max_tokens`, `provider`) is sent to OpenRouter for that seat. `"shuffle_roles": true` deals the roles to the models anew every game.
@@ -76,8 +76,39 @@ python ../frontend/fixtures/make_fixture.py && node ../frontend/state.check.mjs 
 - **Cost:** on every turn a player asks its model, with the whole chat so far, whether to speak. `"llm_defaults": {"seconds_between_turns": 2}` in the table config is the pause after each turn, so it sets how many calls a game makes; without it a player asks again right away. Each call's token usage and cost is saved in `<Name>_reasoning.jsonl`.
 - **Output:** each game gets a directory in `backend/autonomous_games/`, with the files of the original format plus `events.jsonl` (everything that happened, in order) and `<Name>_reasoning.jsonl` (the reasoning trace, output and token usage of every model call).
 - **Elo:** `analyze_autonomous.py` reads the models' ratings from `configurations/model_elo.json` (`{"<model id>": <elo>}`).
-- **Viewer:** the server listens on localhost only, because the game directories hold full prompts and reasoning traces. From another machine, open an SSH tunnel first: `ssh -L 8000:127.0.0.1:8000 <host>`. Use `--games <dir>` to show another games directory.
+- **Viewer:** the server listens on localhost only, because the game directories hold full prompts and reasoning traces. From another machine, open an SSH tunnel first: `ssh -L 8000:127.0.0.1:8000 <host>`. The 3D village is at `/mafia/` and `/misinformation/`; `LLMAFIA_GAMES_DIR` shows another games directory.
 
+
+
+## The arena: four games, one dashboard
+
+Two more deception games run next to Mafia, and a dashboard starts and lists runs of all four. Every game has its own viewer, live or as a replay, and the viewers show player names only, never model names.
+
+| Game | Engine | Viewer |
+|---|---|---|
+| Mafia | `run_autonomous.py` | `/mafia/` (3D village) |
+| Misinformation Mafia | `run_autonomous.py`, `"variant": "misinformation"` | `/misinformation/` (the village, re-themed) |
+| Senate: an original hidden-role game (Loyalists vs a hidden Conspiracy and its Usurper, Secret Hitler's mechanics) | `senate/` | `/senate/` |
+| Heads-up no-limit Hold'em, in duplicate pairs (same cards, seats swapped) | `poker/` | `/poker/` |
+
+```bash
+# the dashboard: start the server with the OpenRouter key in its environment, then open http://127.0.0.1:8000/
+.venv/bin/python server.py
+
+# or from the command line (mock tables play offline; real tables need OPENROUTER_API_KEY)
+.venv/bin/python -m arena.run senate configurations/senate/mock_7p.json --games 3 --parallel 3
+.venv/bin/python -m arena.run poker configurations/poker/experiment.json --games 5   # 5 duplicate pairs
+.venv/bin/python analyze_arena.py senate        # win rate per model and team, with the win reasons
+.venv/bin/python analyze_arena.py poker         # bb/100 per model, duplicate pairs combined
+
+# checks (mock players only, no API calls)
+.venv/bin/python -m senate.selfcheck && .venv/bin/python -m poker.selfcheck && .venv/bin/python server.check.py
+node ../frontend/senate/state.check.mjs && node ../frontend/poker/state.check.mjs
+```
+
+- **Dashboard:** pick a game to see its runs (with Watch links), start a new run from a saved table or by editing the seats and their models, and stop a running launcher. Before any run with a real model it shows the models and a cost estimate (the average of that game's past runs) and asks for confirmation. Only one launcher runs per data directory (Mafia and Misinformation Mafia share one). Launchers keep running when the server stops or restarts; stop them from the dashboard.
+- **Contract:** [docs/ARENA_CONTRACT.md](docs/ARENA_CONTRACT.md) fixes the events, data layout and API that the engines, viewers and server share.
+- **Output:** `backend/senate_games/` and `backend/poker_games/` (or `SENATE_GAMES_DIR`, `POKER_GAMES_DIR`), in the same format as Mafia's: `index.json`, and per game `config.json`, `events.jsonl` and each seat's `<Name>_log.txt` and `<Name>_reasoning.jsonl`.
 
 ## Citation
 If you find this useful for your research, please use the following:
