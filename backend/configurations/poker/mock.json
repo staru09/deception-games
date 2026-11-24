@@ -1,0 +1,7 @@
+{
+  "players": [{"model": "mock"}, {"model": "mock"}],
+  "hands": 20,
+  "duplicate": true,
+  "table_talk": true,
+  "llm_defaults": {"mock_latency_seconds": 0.2}
+}

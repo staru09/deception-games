@@ -1,0 +1,29 @@
+{
+ "game": "poker",
+ "players": [
+  {
+   "name": "Mira",
+   "model": "mock",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  },
+  {
+   "name": "Dax",
+   "model": "mock",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  }
+ ],
+ "hands": 6,
+ "blinds": [
+  1,
+  2
+ ],
+ "stack": 200,
+ "seed": 7,
+ "pair": null,
+ "mirror": false,
+ "table_talk": true
+}

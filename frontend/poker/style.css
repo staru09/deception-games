@@ -1,0 +1,85 @@
+/* Poker viewer, on top of ../common/arena.css */
+:root { --felt: #1d6048; --felt-edge: #0f3a2b; --card: #f8f6ef; --card-ink: #1a1e29; --card-red: #c42f3c; }
+@media (prefers-color-scheme: light) { :root { --felt: #2c8a67; --felt-edge: #1d6048; } }
+
+body { padding: 12px 16px 24px; }
+.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 10px 16px; max-width: 1280px; margin: 0 auto 12px; }
+.top h1 { font-size: 18px; }
+.back { text-decoration: none; }
+.sub { color: var(--muted); font: 12px var(--mono); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; max-width: 1280px; margin: 0 auto; align-items: start; }
+.main-col { display: grid; gap: 12px; min-width: 0; }
+.side { display: grid; gap: 12px; min-width: 0; }
+.panel { padding: 10px 12px; }
+.panel h2 { font-size: 13px; margin-bottom: 6px; color: var(--muted); }
+.empty { max-width: 480px; margin: 12vh auto; padding: 24px; text-align: center; }
+.muted { color: var(--muted); }
+.up { color: var(--good); } .down { color: var(--bad); }
+
+/* table */
+.felt { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; min-height: 480px; padding: 18px 16px;
+  border-radius: 140px / 90px; border: 8px solid var(--felt-edge); background: radial-gradient(ellipse at 50% 45%, var(--felt), var(--felt-edge) 140%);
+  color: #f1f5ef; box-shadow: var(--shadow); }
+.seat { position: relative; min-width: 0; display: grid; justify-items: center; gap: 6px; }
+.who { display: flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 99px; background: rgba(0, 0, 0, 0.35); border: 2px solid transparent; }
+.seat.turn .who { border-color: var(--gold); }
+.seat.won .who { border-color: var(--good); }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.btn-chip { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #fff; color: #000; font: 700 11px var(--mono); }
+.stack { font: 600 14px var(--mono); }
+.delta { font: 700 13px var(--mono); }
+.seat .up { color: #8de8a0; } .seat .down { color: #ff9aa2; }
+.hole { display: flex; gap: 6px; }
+.meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; min-height: 24px; font-size: 12px; }
+.tag, .bet, .hname { padding: 2px 8px; border-radius: 99px; background: rgba(0, 0, 0, 0.35); }
+.tag { text-transform: uppercase; letter-spacing: 0.05em; }
+.bet { background: var(--gold); color: #1a1e29; font: 700 12px var(--mono); }
+.say { max-width: min(320px, 90%); padding: 6px 10px; border-radius: 12px; background: var(--card); color: var(--card-ink); font-size: 13px; font-style: italic; }
+.center { display: grid; justify-items: center; gap: 8px; }
+.board { display: flex; gap: 6px; }
+.pot { font-size: 14px; } .pot b { font: 700 18px var(--mono); }
+.street { margin-left: 6px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em; opacity: 0.8; }
+.result { font-weight: 600; color: #ffe08a; }
+.over { padding: 6px 14px; border-radius: 12px; background: rgba(0, 0, 0, 0.5); font: 700 16px var(--head); text-align: center; }
+.over small { display: block; font: 12px var(--mono); opacity: 0.85; }
+
+/* cards */
+.card { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 46px; height: 64px; border-radius: 6px;
+  background: var(--card); color: var(--card-ink); font-weight: 700; line-height: 1.05; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); }
+.card b { font-size: 20px; } .card i { font-style: normal; font-size: 20px; }
+.card.red { color: var(--card-red); }
+.card.back { background: repeating-linear-gradient(45deg, var(--night) 0 5px, #4b57b8 5px 10px); border: 3px solid var(--card); }
+.card.empty { background: rgba(0, 0, 0, 0.22); box-shadow: none; border: 1px dashed rgba(255, 255, 255, 0.3); }
+.card.hit { outline: 3px solid var(--gold); }
+.card.mini { width: 26px; height: 34px; border-radius: 4px; vertical-align: middle; }
+.card.mini b, .card.mini i { font-size: 12px; }
+
+/* side panels */
+.hands { display: flex; flex-wrap: wrap; gap: 6px; }
+.hands button { display: grid; justify-items: center; min-width: 40px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: transparent; cursor: pointer; font: 600 13px var(--mono); }
+.hands button:hover { border-color: var(--line-strong); }
+.hands button[aria-current] { background: var(--gold); border-color: var(--gold); color: var(--panel-solid); }
+.hands small { font-size: 10px; }
+.hands button[aria-current] small { color: inherit; }
+#chart svg { width: 100%; height: auto; display: block; }
+#chart .zero { stroke: var(--line-strong); stroke-dasharray: 3 3; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+.log { max-height: 340px; overflow-y: auto; display: grid; gap: 4px; align-content: start; }
+.row { font-size: 13px; }
+.row.hand { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--line); font-weight: 600; }
+.row.hand:first-child { border: 0; margin: 0; padding: 0; }
+.row small, .row.note { color: var(--muted); }
+.row.street { color: var(--muted); text-transform: capitalize; }
+.row.result { color: var(--gold); font-weight: 600; }
+.row em { color: var(--bad); font-style: normal; font-weight: 600; }
+.bubble { display: inline-block; margin: 2px 0 0 10px; padding: 3px 9px; border-radius: 10px; background: var(--line); font-style: italic; }
+
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } .log { max-height: 260px; } }
+@media (max-width: 480px) {
+  body { padding: 8px; }
+  .felt { min-height: 440px; padding: 12px 8px; border-radius: 60px / 50px; border-width: 6px; }
+  .card { width: 40px; height: 56px; } .card b, .card i { font-size: 17px; }
+  .card.mini { width: 24px; height: 32px; }
+}
+.say, .bubble, .who, .hname, .row { overflow-wrap: anywhere; }

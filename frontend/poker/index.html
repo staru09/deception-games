@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Poker viewer</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../common/arena.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top glass">
+  <a href="/" class="back">&larr; Dashboard</a>
+  <h1>Heads-up Hold'em</h1>
+  <span class="sub" id="sub"></span>
+</header>
+
+<main class="layout" id="app" hidden>
+  <section class="main-col">
+    <div class="felt" id="felt" aria-label="Table"></div>
+    <div class="glass" id="controls"></div>
+  </section>
+  <aside class="side">
+    <section class="glass panel"><h2>Chips won</h2><div id="chart"></div></section>
+    <section class="glass panel"><h2>Hands</h2><div class="hands" id="hands"></div></section>
+    <section class="glass panel"><h2>Action</h2><div class="log" id="log" role="log" aria-label="Action log" tabindex="0"></div></section>
+  </aside>
+</main>
+
+<section class="empty glass" id="empty" hidden>
+  <h2 id="empty-title"></h2>
+  <p id="empty-text"></p>
+</section>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+{"ts":1700000001.5,"type":"hand_start","hand":1,"button":"Mira","seed":7001,"stacks":{"Mira":200,"Dax":200}}
+{"ts":1700000003,"type":"action","player":"Mira","action":"blind","amount":1,"to":1,"pot":1,"stack":199,"all_in":false}
+{"ts":1700000004.5,"type":"action","player":"Dax","action":"blind","amount":2,"to":2,"pot":3,"stack":198,"all_in":false}
+{"ts":1700000006,"type":"deal","player":"Mira","cards":["Ah","9d"],"spoiler":true}
+{"ts":1700000007.5,"type":"deal","player":"Dax","cards":["7c","2s"],"spoiler":true}
+{"ts":1700000009,"type":"action","player":"Mira","action":"raise","amount":5,"to":6,"pot":8,"stack":194,"all_in":false,"say":"Blinds are mine tonight."}
+{"ts":1700000010.5,"type":"action","player":"Dax","action":"fold","amount":0,"to":2,"pot":8,"stack":198,"all_in":false}
+{"ts":1700000012,"type":"refund","player":"Mira","amount":4,"pot":4}
+{"ts":1700000013.5,"type":"hand_end","hand":1,"winners":["Mira"],"pot":4,"deltas":{"Mira":2,"Dax":-2},"totals":{"Mira":2,"Dax":-2},"board":[]}
+{"ts":1700000015,"type":"hand_start","hand":2,"button":"Dax","seed":7002,"stacks":{"Mira":200,"Dax":200}}
+{"ts":1700000016.5,"type":"action","player":"Dax","action":"blind","amount":1,"to":1,"pot":1,"stack":199,"all_in":false}
+{"ts":1700000018,"type":"action","player":"Mira","action":"blind","amount":2,"to":2,"pot":3,"stack":198,"all_in":false}
+{"ts":1700000019.5,"type":"deal","player":"Mira","cards":["Ah","Kd"],"spoiler":true}
+{"ts":1700000021,"type":"deal","player":"Dax","cards":["9c","9d"],"spoiler":true}
+{"ts":1700000022.5,"type":"action","player":"Dax","action":"call","amount":1,"to":2,"pot":4,"stack":198,"all_in":false}
+{"ts":1700000024,"type":"action","player":"Mira","action":"check","amount":0,"to":2,"pot":4,"stack":198,"all_in":false}
+{"ts":1700000025.5,"type":"street","name":"flop","board":["Kc","7s","2d"]}
+{"ts":1700000027,"type":"action","player":"Mira","action":"check","amount":0,"to":0,"pot":4,"stack":198,"all_in":false}
+{"ts":1700000028.5,"type":"action","player":"Dax","action":"check","amount":0,"to":0,"pot":4,"stack":198,"all_in":false}
+{"ts":1700000030,"type":"street","name":"turn","board":["Kc","7s","2d","4h"]}
+{"ts":1700000031.5,"type":"action","player":"Mira","action":"bet","amount":4,"to":4,"pot":8,"stack":194,"all_in":false,"say":"A small one."}
+{"ts":1700000033,"type":"action","player":"Dax","action":"call","amount":4,"to":4,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000034.5,"type":"street","name":"river","board":["Kc","7s","2d","4h","Jc"]}
+{"ts":1700000036,"type":"action","player":"Mira","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000037.5,"type":"action","player":"Dax","action":"bet","amount":6,"to":6,"pot":18,"stack":188,"all_in":false,"say":"Show me."}
+{"ts":1700000039,"type":"action","player":"Mira","action":"call","amount":6,"to":6,"pot":24,"stack":188,"all_in":false}
+{"ts":1700000040.5,"type":"showdown","player":"Mira","cards":["Ah","Kd"],"hand_name":"a pair of kings","best":["Kc","Kd","Ah","Jc","7s"]}
+{"ts":1700000042,"type":"showdown","player":"Dax","cards":["9c","9d"],"hand_name":"a pair of nines","best":["9c","9d","Kc","Jc","7s"]}
+{"ts":1700000043.5,"type":"hand_end","hand":2,"winners":["Mira"],"pot":24,"deltas":{"Mira":12,"Dax":-12},"totals":{"Mira":14,"Dax":-14},"board":["Kc","7s","2d","4h","Jc"]}
+{"ts":1700000045,"type":"hand_start","hand":3,"button":"Mira","seed":7003,"stacks":{"Mira":200,"Dax":200}}
+{"ts":1700000046.5,"type":"action","player":"Mira","action":"blind","amount":1,"to":1,"pot":1,"stack":199,"all_in":false}
+{"ts":1700000048,"type":"action","player":"Dax","action":"blind","amount":2,"to":2,"pot":3,"stack":198,"all_in":false}
+{"ts":1700000049.5,"type":"deal","player":"Mira","cards":["Qs","Qh"],"spoiler":true}
+{"ts":1700000051,"type":"deal","player":"Dax","cards":["Ad","Kd"],"spoiler":true}
+{"ts":1700000052.5,"type":"action","player":"Mira","action":"raise","amount":5,"to":6,"pot":8,"stack":194,"all_in":false}
+{"ts":1700000054,"type":"action","player":"Dax","action":"raise","amount":18,"to":20,"pot":26,"stack":180,"all_in":false,"say":"Let us make it interesting."}
+{"ts":1700000055.5,"type":"action","player":"Mira","action":"raise","amount":54,"to":60,"pot":80,"stack":140,"all_in":false}
+{"ts":1700000057,"type":"action","player":"Dax","action":"raise","amount":180,"to":200,"pot":260,"stack":0,"all_in":true,"say":"All of it."}
+{"ts":1700000058.5,"type":"action","player":"Mira","action":"call","amount":140,"to":200,"pot":400,"stack":0,"all_in":true,"say":"Fine. Call."}
+{"ts":1700000060,"type":"street","name":"flop","board":["Kc","8h","3d"]}
+{"ts":1700000061.5,"type":"street","name":"turn","board":["Kc","8h","3d","5s"]}
+{"ts":1700000063,"type":"street","name":"river","board":["Kc","8h","3d","5s","Kh"]}
+{"ts":1700000064.5,"type":"showdown","player":"Mira","cards":["Qs","Qh"],"hand_name":"two pair, kings and queens","best":["Kc","Kh","Qs","Qh","8h"]}
+{"ts":1700000066,"type":"showdown","player":"Dax","cards":["Ad","Kd"],"hand_name":"three of a kind, kings","best":["Kd","Kc","Kh","Ad","8h"]}
+{"ts":1700000067.5,"type":"hand_end","hand":3,"winners":["Dax"],"pot":400,"deltas":{"Mira":-200,"Dax":200},"totals":{"Mira":-186,"Dax":186},"board":["Kc","8h","3d","5s","Kh"]}
+{"ts":1700000069,"type":"hand_start","hand":4,"button":"Dax","seed":7004,"stacks":{"Mira":200,"Dax":200}}
+{"ts":1700000070.5,"type":"action","player":"Dax","action":"blind","amount":1,"to":1,"pot":1,"stack":199,"all_in":false}
+{"ts":1700000072,"type":"action","player":"Mira","action":"blind","amount":2,"to":2,"pot":3,"stack":198,"all_in":false}
+{"ts":1700000073.5,"type":"deal","player":"Mira","cards":["2h","3d"],"spoiler":true}
+{"ts":1700000075,"type":"deal","player":"Dax","cards":["4c","5s"],"spoiler":true}
+{"ts":1700000076.5,"type":"action","player":"Dax","action":"call","amount":1,"to":2,"pot":4,"stack":198,"all_in":false}
+{"ts":1700000078,"type":"action","player":"Mira","action":"check","amount":0,"to":2,"pot":4,"stack":198,"all_in":false}
+{"ts":1700000079.5,"type":"street","name":"flop","board":["As","Kd","Qh"]}
+{"ts":1700000081,"type":"action","player":"Mira","action":"check","amount":0,"to":0,"pot":4,"stack":198,"all_in":false}
+{"ts":1700000082.5,"type":"action","player":"Dax","action":"bet","amount":4,"to":4,"pot":8,"stack":194,"all_in":false,"say":"Nothing to bluff here."}
+{"ts":1700000084,"type":"action","player":"Mira","action":"call","amount":4,"to":4,"pot":12,"stack":194,"all_in":false,"say":"Same board, same hand."}
+{"ts":1700000085.5,"type":"street","name":"turn","board":["As","Kd","Qh","Jc"]}
+{"ts":1700000087,"type":"action","player":"Mira","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000088.5,"type":"action","player":"Dax","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000090,"type":"street","name":"river","board":["As","Kd","Qh","Jc","Tc"]}
+{"ts":1700000091.5,"type":"action","player":"Mira","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000093,"type":"action","player":"Dax","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000094.5,"type":"showdown","player":"Mira","cards":["2h","3d"],"hand_name":"a straight, ace high","best":["As","Kd","Qh","Jc","Tc"]}
+{"ts":1700000096,"type":"showdown","player":"Dax","cards":["4c","5s"],"hand_name":"a straight, ace high","best":["As","Kd","Qh","Jc","Tc"]}
+{"ts":1700000097.5,"type":"hand_end","hand":4,"winners":["Mira","Dax"],"pot":12,"deltas":{"Mira":0,"Dax":0},"totals":{"Mira":-186,"Dax":186},"board":["As","Kd","Qh","Jc","Tc"]}
+{"ts":1700000099,"type":"hand_start","hand":5,"button":"Mira","seed":7005,"stacks":{"Mira":200,"Dax":200}}
+{"ts":1700000100.5,"type":"action","player":"Mira","action":"blind","amount":1,"to":1,"pot":1,"stack":199,"all_in":false}
+{"ts":1700000102,"type":"action","player":"Dax","action":"blind","amount":2,"to":2,"pot":3,"stack":198,"all_in":false}
+{"ts":1700000103.5,"type":"deal","player":"Mira","cards":["Jh","Jd"],"spoiler":true}
+{"ts":1700000105,"type":"deal","player":"Dax","cards":["8s","6s"],"spoiler":true}
+{"ts":1700000106.5,"type":"action","player":"Mira","action":"raise","amount":5,"to":6,"pot":8,"stack":194,"all_in":false}
+{"ts":1700000108,"type":"action","player":"Dax","action":"call","amount":4,"to":6,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000109.5,"type":"street","name":"flop","board":["Ts","4d","2c"]}
+{"ts":1700000111,"type":"action","player":"Dax","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000112.5,"type":"action","player":"Mira","action":"bet","amount":8,"to":8,"pot":20,"stack":186,"all_in":false,"say":"Pay to see the turn."}
+{"ts":1700000114,"type":"action","player":"Dax","action":"fold","amount":0,"to":0,"pot":20,"stack":194,"all_in":false}
+{"ts":1700000115.5,"type":"refund","player":"Mira","amount":8,"pot":12}
+{"ts":1700000117,"type":"hand_end","hand":5,"winners":["Mira"],"pot":12,"deltas":{"Mira":6,"Dax":-6},"totals":{"Mira":-180,"Dax":180},"board":["Ts","4d","2c"]}
+{"ts":1700000118.5,"type":"hand_start","hand":6,"button":"Dax","seed":7006,"stacks":{"Mira":200,"Dax":200}}
+{"ts":1700000120,"type":"action","player":"Dax","action":"blind","amount":1,"to":1,"pot":1,"stack":199,"all_in":false}
+{"ts":1700000121.5,"type":"action","player":"Mira","action":"blind","amount":2,"to":2,"pot":3,"stack":198,"all_in":false}
+{"ts":1700000123,"type":"deal","player":"Mira","cards":["Kh","Qd"],"spoiler":true}
+{"ts":1700000124.5,"type":"deal","player":"Dax","cards":["5h","5d"],"spoiler":true}
+{"ts":1700000126,"type":"action","player":"Dax","action":"raise","amount":5,"to":6,"pot":8,"stack":194,"all_in":false}
+{"ts":1700000127.5,"type":"action","player":"Mira","action":"call","amount":4,"to":6,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000129,"type":"street","name":"flop","board":["9c","3h","Js"]}
+{"ts":1700000130.5,"type":"action","player":"Mira","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000132,"type":"action","player":"Dax","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000133.5,"type":"street","name":"turn","board":["9c","3h","Js","2d"]}
+{"ts":1700000135,"type":"action","player":"Mira","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000136.5,"type":"action","player":"Dax","action":"check","amount":0,"to":0,"pot":12,"stack":194,"all_in":false}
+{"ts":1700000138,"type":"street","name":"river","board":["9c","3h","Js","2d","8s"]}
+{"ts":1700000139.5,"type":"action","player":"Mira","action":"bet","amount":10,"to":10,"pot":22,"stack":184,"all_in":false}
+{"ts":1700000141,"type":"action","player":"Dax","action":"raise","amount":30,"to":30,"pot":52,"stack":164,"all_in":false,"say":"I do not believe you."}
+{"ts":1700000142.5,"type":"action","player":"Mira","action":"fold","amount":0,"to":10,"pot":52,"stack":184,"all_in":false}
+{"ts":1700000144,"type":"refund","player":"Dax","amount":20,"pot":32}
+{"ts":1700000145.5,"type":"hand_end","hand":6,"winners":["Dax"],"pot":32,"deltas":{"Mira":-16,"Dax":16},"totals":{"Mira":-196,"Dax":196},"board":["9c","3h","Js","2d","8s"]}
+{"ts":1700000147,"type":"game_over","winner":"Dax","reason":"hands_played","hands":6,"totals":{"Mira":-196,"Dax":196}}
