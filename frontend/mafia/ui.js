@@ -10,6 +10,19 @@ import { aliveCounts } from './state.js';
 const $ = (id) => document.getElementById(id);
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ROLES = new Set(['mafia', 'detective', 'doctor', 'villager', 'false_detective']);
+// Misinformation Mafia (this page at /misinformation/, see index.html) calls the narrator the
+// Storyteller, as in Clocktower.
+const MISINFORMATION = document.documentElement.dataset.variant === 'misinformation';
+export const GAME_NAME = MISINFORMATION ? 'Misinformation Mafia' : 'LLMafia';
+const NARRATOR = MISINFORMATION ? 'Storyteller' : 'Moderator';
+if (MISINFORMATION) {   // the page's own text names the plain game
+  document.querySelector('.brand').textContent = GAME_NAME;
+  document.getElementById('empty-title').textContent = GAME_NAME;
+  const voice = document.getElementById('voice');
+  voice.setAttribute('aria-label', `${NARRATOR} voice`);
+  voice.title = `${NARRATOR} voice (plays at 1× speed)`;
+  voice.querySelector('.lbl').textContent = `${NARRATOR} voice`;
+}
 const keep = (kids) => kids.flat(2).filter((k) => k != null && k !== false && k !== '');
 
 function h(tag, props, ...kids) {
@@ -250,8 +263,8 @@ export function createUI({ players, on, initial = {} }) {
         // The exchange between the detective and the moderator, for spectators. Town view names
         // the role the player believes it has; god view its real one, and marks a false answer.
         const role = god ? byName.get(e.detective)?.role ?? 'detective' : 'detective';
-        el = h('p', { class: 'private' }, pname(e.detective), ' (', role.replace('_', ' '), ') asked the moderator about ',
-          pname(e.target), '. The moderator answered: ',
+        el = h('p', { class: 'private' }, pname(e.detective), ' (', role.replace('_', ' '), `) asked the ${NARRATOR.toLowerCase()} about `,
+          pname(e.target), `. The ${NARRATOR.toLowerCase()} answered: `,
           h('strong', { class: e.is_mafia ? 'bad' : 'good', text: e.is_mafia ? 'mafia' : 'not mafia' }),
           god && e.misled && [' ', tag('false answer', 'tag-mafia')]);
         break;
@@ -278,7 +291,7 @@ export function createUI({ players, on, initial = {} }) {
         const f = e.fact;
         const fact = f?.kind === 'eliminated' ? [pname(f.name), f.role && roleTag(f.role)]
           : f?.kind === 'saved' && god ? [pname(f.name), ' saved by the doctor'] : null;
-        el = h('p', { class: 'narration' }, h('span', { class: 'narrator', text: 'Moderator' }), e.text,
+        el = h('p', { class: 'narration' }, h('span', { class: 'narrator', text: NARRATOR }), e.text,
           fact && h('span', { class: 'fact' }, fact));
         break;
       }
@@ -500,7 +513,7 @@ export function createUI({ players, on, initial = {} }) {
   // The browser blocked the moderator's voice until the page is clicked: say so on the speaker button.
   function setVoiceBlocked(on) {
     $('voice').classList.toggle('blocked', on);
-    $('voice').title = on ? 'Click anywhere to hear the moderator' : 'Moderator voice (plays at 1× speed)';
+    $('voice').title = on ? `Click anywhere to hear the ${NARRATOR.toLowerCase()}` : `${NARRATOR} voice (plays at 1× speed)`;
   }
 
   return { render, tick, announce, clearToast, setGames, setScene, setVoiceBlocked, openCard, closeCard, get cardName() { return cardName; } };

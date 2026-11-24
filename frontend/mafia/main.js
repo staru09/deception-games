@@ -4,7 +4,7 @@
 // URL parameters: game=<id>  scene=off  at=<n>|end  speed=1|4|16  reveal=1  card=<name>
 //                 skin=robots  tod=day|night  follow=1  sheet=open  still=1
 import { initialState, apply, toSnapshot, completeLines, liveness } from './state.js';
-import { createUI, showEmpty } from './ui.js';
+import { createUI, showEmpty, GAME_NAME } from './ui.js';
 
 const q = new URLSearchParams(location.search);
 if (q.get('still') === '1') document.documentElement.classList.add('still');   // no CSS motion, for screenshots
@@ -42,7 +42,7 @@ async function boot() {
   const base = `games/${encodeURIComponent(id)}/`;
   const config = await get(base + 'config.json').catch(() => null);
   if (!Array.isArray(config?.players)) return showEmpty('missing', id);
-  document.title = `Game ${id} · LLMafia`;
+  document.title = `Game ${id} · ${GAME_NAME}`;
   return run(String(id), base, config, index);
 }
 

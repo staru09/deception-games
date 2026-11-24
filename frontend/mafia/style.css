@@ -112,7 +112,8 @@ body {
 /* ---------- top bar ---------- */
 
 .topbar { grid-area: top; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 12px; min-width: 0; }
-.brand { font: 700 18px var(--head); letter-spacing: 0.08em; color: var(--gold); }
+.brand { font: 700 18px var(--head); letter-spacing: 0.08em; color: var(--gold); text-decoration: none; }
+.home { display: none; place-items: center; color: var(--text); }
 
 .phase {
   display: inline-flex;
@@ -449,6 +450,7 @@ button.pname:hover { text-decoration: underline; }
 }
 @media (max-width: 1099px) {
   .brand { display: none; }
+  .home { display: inline-grid; }   /* the way back to the dashboard while the brand is hidden */
   .roster { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
   .chip { padding: 5px 8px; }
 }
@@ -472,7 +474,9 @@ button.pname:hover { text-decoration: underline; }
   }
   .topbar { gap: 6px 8px; padding: 8px; }
   .counts { margin-left: auto; gap: 10px; }
-  .toggles { order: 2; gap: 5px; }   /* second row: the icon toggles, then the game picker */
+  .home, .toggles { order: 2; }   /* second row: home, the icon toggles, then the game picker */
+  .toggles { gap: 5px; }
+  .home { width: 32px; }
   .toggles .btn { width: 32px; padding: 0; }
   .picker { order: 3; flex: 1 1 0; max-width: none; margin-left: 0; }
 
@@ -502,3 +506,41 @@ button.pname:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- Misinformation Mafia (../misinformation/): the same village at dusk, in violet ---------- */
+
+:root[data-variant="misinformation"] {
+  --bg: #0e0a17;
+  --panel: rgba(27, 19, 42, 0.74);
+  --panel-solid: #1b1429;
+  --line: rgba(232, 214, 255, 0.1);
+  --line-strong: rgba(232, 214, 255, 0.22);
+  --text: #eee9f6;
+  --muted: #b2a8c6;
+  --gold: #f4a582;   /* the accent: the last light of dusk */
+  --day: #f4a582;
+  --night: #a888ff;
+}
+:root[data-variant="misinformation"] body {
+  background:
+    radial-gradient(1100px 640px at 12% -12%, rgba(244, 165, 130, 0.16), transparent 62%),
+    radial-gradient(900px 620px at 96% 112%, rgba(168, 136, 255, 0.2), transparent 60%),
+    var(--bg);
+}
+:root[data-variant="misinformation"] .app::after {
+  background:
+    radial-gradient(1000px 600px at 84% -14%, rgba(168, 136, 255, 0.26), transparent 62%),
+    radial-gradient(900px 620px at 4% 112%, rgba(96, 40, 130, 0.36), transparent 60%),
+    #0a0713;
+}
+:root[data-variant="misinformation"] .placeholder {
+  background: radial-gradient(circle at 50% 36%, rgba(244, 165, 130, 0.2), transparent 44%), linear-gradient(#251a36, #120d1d);
+}
+:root[data-variant="misinformation"] .app:not([data-phase="night"]) .phase,
+:root[data-variant="misinformation"] .btn[aria-pressed="true"] {
+  color: #ffd2bd; border-color: rgba(244, 165, 130, 0.5); background: rgba(244, 165, 130, 0.12);
+}
+:root[data-variant="misinformation"] .narration { background: rgba(168, 136, 255, 0.08); border-left-color: var(--night); }
+:root[data-variant="misinformation"] .narrator { color: var(--night); }
+:root[data-variant="misinformation"] .sys.over { border-color: rgba(244, 165, 130, 0.5); background: rgba(244, 165, 130, 0.08); }
+:root[data-variant="misinformation"] .winner.town { border-color: rgba(244, 165, 130, 0.55); box-shadow: 0 0 44px rgba(244, 165, 130, 0.2); }
