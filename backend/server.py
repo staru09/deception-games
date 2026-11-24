@@ -71,7 +71,7 @@ GAMES = {
                "roles": ["usurper", "conspirator", "loyalist"],
                "description": "Loyalists pass reforms while a hidden Conspiracy pushes decrees "
                               "and tries to raise its Usurper."},
-    "poker": {"title": "Heads-up Hold'em", "sides": [], "roles": [],
+    "poker": {"title": "Poker", "sides": [], "roles": [],
               "description": "Two models play no-limit Texas Hold'em, in duplicate pairs that "
                              "cancel out the luck of the cards."},
 }

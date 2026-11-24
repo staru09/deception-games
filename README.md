@@ -89,7 +89,7 @@ Two more deception games run next to Mafia, and a dashboard starts and lists run
 | Mafia | `run_autonomous.py` | `/mafia/` (3D village) |
 | Misinformation Mafia | `run_autonomous.py`, `"variant": "misinformation"` | `/misinformation/` (the village, re-themed) |
 | Senate: an original hidden-role game (Loyalists vs a hidden Conspiracy and its Usurper, Secret Hitler's mechanics) | `senate/` | `/senate/` |
-| Heads-up no-limit Hold'em, in duplicate pairs (same cards, seats swapped) | `poker/` | `/poker/` |
+| Poker: heads-up no-limit Hold'em, in duplicate pairs (same cards, seats swapped) | `poker/` | `/poker/` |
 
 ```bash
 # the dashboard: start the server with the OpenRouter key in its environment, then open http://127.0.0.1:8000/
