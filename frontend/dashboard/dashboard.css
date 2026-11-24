@@ -207,6 +207,7 @@ input[type="checkbox"] { height: auto; accent-color: var(--gold); }
 .status.bad { color: var(--bad); }
 
 /* ---------- launchers (the log is the last 15 lines: shown whole, nothing to scroll) ---------- */
+.launchers-panel { margin-top: 16px; }
 .launchers { display: grid; gap: 12px; }
 .launcher-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .launcher-head .btn { margin-left: auto; }
