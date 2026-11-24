@@ -1,0 +1,2 @@
+{"players": [{"model": "mock"}, {"model": "mock"}, {"model": "mock"}],
+ "llm_defaults": {"mock_latency_seconds": 0}}

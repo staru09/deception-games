@@ -6,4 +6,7 @@ __pycache__/
 .secrets_dict.txt
 backend/autonomous_games/
 backend/mock_games/
-frontend/fixtures/games/
+frontend/mafia/fixtures/games/
+backend/senate_games/
+backend/poker_games/
+backend/launches/
