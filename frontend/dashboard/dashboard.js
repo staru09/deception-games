@@ -14,20 +14,16 @@ const OPTIONS = {
           { key: 'table_talk', label: 'Table talk', type: 'checkbox', def: true }],
 };
 
-// Each game is a court card: its rank and suit in the corners, its emblem in the middle.
-const COURT = {
-  mafia: { rank: 'J', suit: '♠', emblem: 'dagger' },
-  misinformation: { rank: 'Q', suit: '♦', emblem: 'masks' },
-  senate: { rank: 'K', suit: '♣', emblem: 'columns' },
-  poker: { rank: 'A', suit: '♥', emblem: 'cards' },
+// Each game's card: its colour, a short tagline and its emblem.
+const LOOK = {
+  mafia: { color: 'red', emblem: 'dagger', tag: 'Lie by night. Vote by day.' },
+  misinformation: { color: 'yellow', emblem: 'masks', tag: 'Trust no claim.' },
+  senate: { color: 'green', emblem: 'columns', tag: 'Pass laws. Unmask the traitor.' },
+  poker: { color: 'blue', emblem: 'cards', tag: 'Bluff. Raise. Read.' },
 };
 // Line-art emblems (our own static markup, never data from the API), drawn in currentColor.
-const LAUREL = [[46, 90, -10], [34, 86, -25], [24, 78, -40], [17, 68, -55], [13, 57, -70], [12, 46, -85]]
-  .map(([x, y, a]) => `<ellipse cx="${x}" cy="${y}" rx="6.5" ry="2.6" transform="rotate(${a} ${x} ${y})"/>`).join('');
-const CROWN = '<path d="M10 46 6 20l14 12 12-20 12 20 14-12-4 26Z"/><path d="M12 53h40"/><circle cx="6" cy="17" r="2.6"/><circle cx="32" cy="9" r="2.6"/><circle cx="58" cy="17" r="2.6"/><circle cx="32" cy="37" r="3.2"/>';
 const EMBLEMS = {
-  crown: ['0 0 64 64', CROWN],
-  crest: ['0 0 120 100', `<g transform="translate(36 14) scale(.75)">${CROWN}</g><path d="M56 93C30 88 14 70 12 42"/>${LAUREL}<g transform="translate(120 0) scale(-1 1)"><path d="M56 93C30 88 14 70 12 42"/>${LAUREL}</g>`],
+  die: ['0 0 64 64', '<path d="M32 6 56 19 32 32 8 19Z"/><path d="M8 19v26l24 13V32"/><path d="M56 19v26L32 58"/><circle cx="32" cy="19" r="2.6" fill="currentColor"/><circle cx="17" cy="33" r="2.6" fill="currentColor"/><circle cx="23" cy="44" r="2.6" fill="currentColor"/><circle cx="40" cy="36" r="2.6" fill="currentColor"/><circle cx="48" cy="44" r="2.6" fill="currentColor"/>'],
   dagger: ['0 0 64 64', '<path d="M32 5l5 8v27H27V13Z"/><path d="M32 11v26"/><path d="M19 40h26"/><path d="M29 41v11h6V41"/><circle cx="32" cy="56" r="3.5"/>'],
   masks: ['0 0 64 64', '<path d="M7 13c8-4 16-4 24 0 0 17-4 27-12 29C11 40 7 30 7 13Z"/><path d="M12 22q3-3 6 0M21 22q3-3 6 0M13 30q6 6 12 0"/><path d="M33 21c8-4 16-4 24 0 0 17-4 27-12 29-8-2-12-12-12-29Z"/><path d="M38 31q3 2 6 0M47 31q3 2 6 0M40 42q5-5 10 0"/>'],
   columns: ['0 0 64 64', '<path d="M8 22 32 8l24 14Z"/><path d="M10 26h44"/><path d="M15 29v19M25 29v19M39 29v19M49 29v19"/><path d="M10 51h44M6 57h52"/>'],
@@ -87,17 +83,15 @@ function stats(g) {
 
 function renderCards() {
   $('cards').replaceChildren(...Object.entries(games).map(([key, g]) => {
-    const court = COURT[key] ?? { rank: '?', suit: '◆', emblem: 'crown' };
-    const pip = (where) => h('span', { class: 'pip ' + where, 'aria-hidden': 'true' },
-      h('b', { text: court.rank }), h('i', { text: court.suit }));
-    const medal = h('span', { class: 'medal' });
-    medal.innerHTML = svg(court.emblem);   // static markup from EMBLEMS
-    return h('a', { class: 'card', href: '#' + key, 'data-game': key },
-      pip('tl'), pip('br'),
-      medal,
-      h('h2', { text: g.title }),
-      h('p', { class: 'desc', text: g.description }),
-      h('span', { class: 'enter', text: 'Enter the court' }));
+    const look = LOOK[key] ?? { color: 'blue', emblem: 'die', tag: '' };
+    const art = h('span', { class: 'tile', 'aria-hidden': 'true' });
+    art.innerHTML = svg(look.emblem);   // static markup from EMBLEMS
+    return h('a', { class: 'card ' + look.color, href: '#' + key, 'data-game': key },
+      h('span', { class: 'art' }, art, h('i', { class: 'burst', 'aria-hidden': 'true' })),
+      h('span', { class: 'body' },
+        h('h3', { text: g.title }),
+        h('span', { class: 'tag', text: look.tag }),
+        h('span', { class: 'pill white', text: 'Play Now →' })));
   }));
 }
 
@@ -106,7 +100,7 @@ function renderCards() {
 function renderGame() {
   const g = games[route];
   $('game').dataset.game = route;
-  $('g-emblem').innerHTML = svg(COURT[route]?.emblem ?? 'crown');   // static markup from EMBLEMS
+  $('g-emblem').innerHTML = svg(LOOK[route]?.emblem ?? 'die');   // static markup from EMBLEMS
   $('g-title').textContent = g.title;
   $('g-desc').textContent = g.description;
   $('g-stats').replaceChildren(...stats(g));
@@ -295,7 +289,7 @@ function go() {
   $('home').hidden = !!route;
   $('game').hidden = !route;
   document.body.dataset.route = route ?? 'home';
-  document.title = route ? `${games[route].title} · Arena` : 'Arena';
+  document.title = route ? `${games[route].title} · Deception Arena` : 'Deception Arena';
   if (route) {
     renderGame();
     openNewRun(route);
@@ -311,6 +305,14 @@ $('nr-start').addEventListener('click', start);
 addEventListener('hashchange', go);
 
 for (const el of document.querySelectorAll('[data-emblem]')) el.innerHTML = svg(el.dataset.emblem);
+for (const el of document.querySelectorAll('[data-scroll]')) {   // the hero and footer buttons
+  el.addEventListener('click', () => {
+    const scroll = () => $(el.dataset.scroll).scrollIntoView({ behavior: 'smooth' });
+    if (!route) return scroll();
+    addEventListener('hashchange', () => setTimeout(scroll), { once: true });   // after go() scrolled to the top
+    location.hash = '';   // from a game page: back home first
+  });
+}
 document.body.dataset.route = 'home';
 models = await get('/api/models').catch(() => []);
 await refresh();

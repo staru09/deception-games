@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark light">
-<title>Arena</title>
+<meta name="color-scheme" content="light dark">
+<title>Deception Arena</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="common/arena.css">
 <link rel="stylesheet" href="dashboard/dashboard.css">
@@ -12,21 +12,79 @@
 <body>
 
 <header class="top">
-  <a class="brand" href="#"><span class="emblem" data-emblem="crown" aria-hidden="true"></span>Deception Arena</a>
+  <a class="brand" href="#"><span class="emblem" data-emblem="die" aria-hidden="true"></span>Deception Arena</a>
   <span class="conn" id="conn" role="status"></span>
+  <button type="button" class="pill red" data-scroll="games">Play Now <span aria-hidden="true">→</span></button>
 </header>
 
 <main>
   <!-- #: every game -->
   <section id="home" aria-labelledby="hero-h">
     <div class="hero">
-      <span class="crest" data-emblem="crest" aria-hidden="true"></span>
-      <p class="eyebrow">AI against AI</p>
-      <h1 id="hero-h">Deception Arena</h1>
-      <p class="tagline">Four courts of intrigue where models bluff, scheme and betray one another. Choose a table.</p>
-      <div class="flourish" aria-hidden="true"><span>◆</span></div>
+      <svg class="clouds" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+        <g fill="#fff"><ellipse cx="560" cy="70" rx="46" ry="20"/><ellipse cx="590" cy="56" rx="32" ry="24"/><ellipse cx="620" cy="72" rx="38" ry="17"/></g>
+        <g fill="#fff"><ellipse cx="1080" cy="60" rx="50" ry="18"/><ellipse cx="1110" cy="46" rx="30" ry="22"/></g>
+        <g fill="#fff" opacity=".9"><ellipse cx="60" cy="300" rx="70" ry="26"/><ellipse cx="100" cy="282" rx="40" ry="28"/></g>
+        <g fill="#fff" opacity=".85"><ellipse cx="760" cy="230" rx="44" ry="16"/><ellipse cx="786" cy="219" rx="26" ry="18"/></g>
+      </svg>
+      <div class="hero-copy">
+        <p class="eyebrow"><span aria-hidden="true">✦ ✦</span> Bluff · Scheme · Betray</p>
+        <h1 id="hero-h"><span class="l1">AI vs AI,</span> <span class="l2">Deception Games!</span></h1>
+        <p class="tagline">Watch language models lie, accuse and outplay each other in four games of hidden information.</p>
+        <button type="button" class="pill yellow big" data-scroll="games">Explore Games <span aria-hidden="true">→</span></button>
+      </div>
+      <svg class="hero-art" viewBox="0 0 420 330" aria-hidden="true" focusable="false">
+        <g class="spark" fill="#ffd23f" stroke="#1e2240" stroke-width="3" stroke-linejoin="round">
+          <path d="M70 40l6 16 16 6-16 6-6 16-6-16-16-6 16-6z"/><path d="M372 150l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
+        </g>
+        <g transform="translate(96 120) rotate(-14)">
+          <rect x="-34" y="-48" width="68" height="96" rx="9" fill="#fff" stroke="#1e2240" stroke-width="4"/>
+          <path d="M0 6l-13-13c-7-8 4-17 13-8 9-9 20 0 13 8z" fill="#e2493e"/>
+        </g>
+        <g transform="translate(140 112) rotate(10)">
+          <rect x="-34" y="-48" width="68" height="96" rx="9" fill="#fff" stroke="#1e2240" stroke-width="4"/>
+          <path d="M0-14c-14 12-20 18-12 26 4 4 9 2 12-2 3 4 8 6 12 2 8-8 2-14-12-26zm-3 18h6l3 14h-12z" fill="#1e2240"/>
+        </g>
+        <path d="M230 186 L351 256 L351 270 L230 340 L109 270 L109 256 Z" fill="#a8652b" stroke="#1e2240" stroke-width="4" stroke-linejoin="round"/>
+        <g transform="translate(230 186) matrix(.866 .5 -.866 .5 0 0)" stroke="#1e2240" stroke-width="2.5">
+          <rect width="140" height="140" fill="#fbf1dd" stroke-width="5"/>
+          <rect x="0" y="0" width="35" height="35" fill="#e2493e"/><rect x="70" y="0" width="35" height="35" fill="#ffc93c"/>
+          <rect x="35" y="35" width="35" height="35" fill="#4fae46"/><rect x="105" y="35" width="35" height="35" fill="#e2493e"/>
+          <rect x="0" y="70" width="35" height="35" fill="#3d7fd6"/><rect x="70" y="70" width="35" height="35" fill="#e2493e"/>
+          <rect x="35" y="105" width="35" height="35" fill="#ffc93c"/><rect x="105" y="105" width="35" height="35" fill="#4fae46"/>
+        </g>
+        <g transform="translate(196 258)" stroke="#1e2240" stroke-width="4" stroke-linejoin="round">
+          <ellipse rx="28" ry="11" fill="#b8322a"/><path d="M-21-4Q-15-44-8-56H8Q15-44 21-4Z" fill="#e2493e"/>
+          <circle cy="-68" r="17" fill="#e2493e"/><circle cx="-6" cy="-74" r="5" fill="#fff" stroke="none" opacity=".7"/>
+        </g>
+        <g transform="translate(270 246) scale(.82)" stroke="#1e2240" stroke-width="4.5" stroke-linejoin="round">
+          <ellipse rx="28" ry="11" fill="#2b62b3"/><path d="M-21-4Q-15-44-8-56H8Q15-44 21-4Z" fill="#3d7fd6"/>
+          <circle cy="-68" r="17" fill="#3d7fd6"/><circle cx="-6" cy="-74" r="5" fill="#fff" stroke="none" opacity=".7"/>
+        </g>
+        <g transform="translate(300 64) rotate(8)" stroke="#1e2240" stroke-width="4" stroke-linejoin="round">
+          <path d="M0-32 36-13 0 6-36-13Z" fill="#fff"/><path d="M-36-13 0 6V48L-36 29Z" fill="#ece6dc"/><path d="M0 6 36-13V29L0 48Z" fill="#d9d2c6"/>
+          <g fill="#1e2240" stroke="none"><ellipse cy="-13" rx="6" ry="3.5"/><ellipse cx="-24" cy="2" rx="3.5" ry="5"/><ellipse cx="-12" cy="30" rx="3.5" ry="5"/>
+          <ellipse cx="10" cy="10" rx="3.5" ry="5"/><ellipse cx="18" cy="21" rx="3.5" ry="5"/><ellipse cx="26" cy="32" rx="3.5" ry="5"/></g>
+        </g>
+      </svg>
+      <div class="ground" aria-hidden="true"></div>
     </div>
-    <div class="cards" id="cards"></div>
+
+    <div class="games" id="games">
+      <h2 class="section-title"><span aria-hidden="true">✦</span> Our Games <span aria-hidden="true">✦</span></h2>
+      <p class="section-sub">Four games of bluffing and deduction, played entirely by AI.</p>
+      <div class="cards" id="cards"></div>
+    </div>
+
+    <div class="cta">
+      <span class="emblem cta-die" data-emblem="die" aria-hidden="true"></span>
+      <div>
+        <h2>Ready to Play?</h2>
+        <p>Pick a game, start a run, and see which model lies best.</p>
+      </div>
+      <button type="button" class="pill red big" data-scroll="games">Start Playing Now <span aria-hidden="true">→</span></button>
+      <div class="ground" aria-hidden="true"></div>
+    </div>
   </section>
 
   <!-- #<game>: one game's stats, its running launchers (with Stop) and the New run panel -->
@@ -36,7 +94,7 @@
       <h1><span class="emblem" id="g-emblem" aria-hidden="true"></span><span id="g-title"></span></h1>
       <p class="muted" id="g-desc"></p>
       <dl class="stats" id="g-stats"></dl>
-      <a class="enter" id="g-viewer" href="#">Open the viewer</a>
+      <a class="pill" id="g-viewer" href="#">Open the viewer <span aria-hidden="true">→</span></a>
       <div class="running" id="g-running" role="status"></div>
     </header>
     <div class="cols">
@@ -58,6 +116,12 @@
     </div>
   </section>
 </main>
+
+<footer class="foot">
+  <a class="brand" href="#"><span class="emblem" data-emblem="die" aria-hidden="true"></span>Deception Arena</a>
+  <span class="foot-tag">Bluff. Scheme. Betray.</span>
+  <a class="gh" href="https://github.com/staru09/deception-games" aria-label="Source on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg></a>
+</footer>
 
 <dialog class="confirm" id="confirm" aria-labelledby="confirm-h">
   <form method="dialog">
