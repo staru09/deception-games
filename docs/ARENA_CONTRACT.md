@@ -1,8 +1,7 @@
 # Arena contract
 
-The shared agreement between the four games, their viewers, the server and the dashboard. The
-plan is `more_games.md`; this file fixes the exact names, shapes and file layout. When code and
-this file disagree, one of them is a bug.
+The shared agreement between the four games, their viewers, the server and the dashboard: the
+exact names, shapes and file layout. When code and this file disagree, one of them is a bug.
 
 ## 1. Layout
 
