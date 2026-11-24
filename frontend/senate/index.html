@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Senate viewer</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../common/arena.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <a class="back" href="/">&larr; Arena</a>
+  <h1>Senate</h1>
+  <div id="meta" class="meta"></div>
+</header>
+<div id="empty" class="empty glass" hidden></div>
+<main id="app" hidden>
+  <div class="rp-wrap glass" id="controls"></div>
+  <section class="board" id="board" aria-label="Board"></section>
+  <aside class="log glass" aria-label="Transcript"><h2>Transcript</h2><ol id="log" aria-live="polite"></ol></aside>
+</main>
+<script type="module" src="main.js"></script>
+</body>
+</html>

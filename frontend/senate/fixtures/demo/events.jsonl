@@ -1,0 +1,258 @@
+{"ts":1700000001.2,"type":"round","n":1,"consul":"Aurelia","tracker":0,"draw_pile":17,"discard_pile":0}
+{"ts":1700000003.3,"type":"nominate","consul":"Aurelia","prefect":"Brutus"}
+{"ts":1700000006.3,"type":"message","name":"Brutus","text":"Let us not repeat the last mistake.","stage":"debate"}
+{"ts":1700000010.2,"type":"message","name":"Cato","text":"Somebody at this table is lying about the cards.","stage":"debate"}
+{"ts":1700000015,"type":"message","name":"Drusus","text":"Careful, accusations without cards are just noise.","stage":"debate"}
+{"ts":1700000016.2,"type":"message","name":"Livia","text":"If the cards were bad, say so plainly.","stage":"debate"}
+{"ts":1700000018.3,"type":"message","name":"Marcus","text":"Fine by me, but I want a report afterwards.","stage":"debate"}
+{"ts":1700000021.3,"type":"message","name":"Octavia","text":"Speak up, the quiet ones worry me most.","stage":"debate"}
+{"ts":1700000025.2,"type":"message","name":"Aurelia","text":"Whoever hid a card owes us an explanation.","stage":"debate"}
+{"ts":1700000030,"type":"vote","voter":"Aurelia","aye":true}
+{"ts":1700000031.2,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000033.3,"type":"vote","voter":"Cato","aye":false}
+{"ts":1700000036.3,"type":"vote","voter":"Drusus","aye":false}
+{"ts":1700000040.2,"type":"vote","voter":"Livia","aye":false}
+{"ts":1700000045,"type":"vote","voter":"Marcus","aye":false}
+{"ts":1700000046.2,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000048.3,"type":"vote_result","passed":false,"ayes":3,"nays":4,"tracker":1}
+{"ts":1700000051.3,"type":"round","n":2,"consul":"Brutus","tracker":1,"draw_pile":17,"discard_pile":0}
+{"ts":1700000055.2,"type":"nominate","consul":"Brutus","prefect":"Cato"}
+{"ts":1700000060,"type":"message","name":"Cato","text":"I count the decrees and I do not like the number.","stage":"debate"}
+{"ts":1700000061.2,"type":"message","name":"Drusus","text":"A fair slate. I will vote with the majority.","stage":"debate"}
+{"ts":1700000063.3,"type":"message","name":"Livia","text":"I have nothing to hide and I will say so every time.","stage":"debate"}
+{"ts":1700000066.3,"type":"message","name":"Marcus","text":"I would rather act than argue.","stage":"debate"}
+{"ts":1700000070.2,"type":"message","name":"Octavia","text":"Our side needs reforms and this is the way to get them.","stage":"debate"}
+{"ts":1700000075,"type":"message","name":"Aurelia","text":"Votes first, stories later.","stage":"debate"}
+{"ts":1700000076.2,"type":"message","name":"Brutus","text":"I will back anyone who has a clean record so far.","stage":"debate"}
+{"ts":1700000078.3,"type":"vote","voter":"Aurelia","aye":false}
+{"ts":1700000081.3,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000085.2,"type":"vote","voter":"Cato","aye":true}
+{"ts":1700000090,"type":"vote","voter":"Drusus","aye":false}
+{"ts":1700000091.2,"type":"vote","voter":"Livia","aye":false}
+{"ts":1700000093.3,"type":"vote","voter":"Marcus","aye":false}
+{"ts":1700000096.3,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000100.2,"type":"vote_result","passed":false,"ayes":3,"nays":4,"tracker":2}
+{"ts":1700000105,"type":"round","n":3,"consul":"Cato","tracker":2,"draw_pile":17,"discard_pile":0}
+{"ts":1700000106.2,"type":"nominate","consul":"Cato","prefect":"Drusus"}
+{"ts":1700000108.3,"type":"message","name":"Drusus","text":"I am only a humble senator; I follow the evidence.","stage":"debate"}
+{"ts":1700000111.3,"type":"message","name":"Livia","text":"The tracker is climbing. We need a government now.","stage":"debate"}
+{"ts":1700000115.2,"type":"message","name":"Marcus","text":"Give the pair a chance; we learn nothing from a failed vote.","stage":"debate"}
+{"ts":1700000120,"type":"message","name":"Octavia","text":"I keep a list of who voted how. It is telling.","stage":"debate"}
+{"ts":1700000121.2,"type":"message","name":"Aurelia","text":"I want a government we can all read. Show me your reasons.","stage":"debate"}
+{"ts":1700000123.3,"type":"message","name":"Brutus","text":"Three failures in a row would hand the Senate to chance.","stage":"debate"}
+{"ts":1700000126.3,"type":"message","name":"Cato","text":"This pairing worries me. Why this Prefect?","stage":"debate"}
+{"ts":1700000130.2,"type":"vote","voter":"Aurelia","aye":false}
+{"ts":1700000135,"type":"vote","voter":"Brutus","aye":false}
+{"ts":1700000136.2,"type":"vote","voter":"Cato","aye":true}
+{"ts":1700000138.3,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000141.3,"type":"vote","voter":"Livia","aye":true}
+{"ts":1700000145.2,"type":"vote","voter":"Marcus","aye":false}
+{"ts":1700000150,"type":"vote","voter":"Octavia","aye":false}
+{"ts":1700000151.2,"type":"vote_result","passed":false,"ayes":3,"nays":4,"tracker":3}
+{"ts":1700000153.3,"type":"enact","law":"decree","by":"chaos","reforms":0,"decrees":1,"tracker":0}
+{"ts":1700000156.3,"type":"round","n":4,"consul":"Drusus","tracker":0,"draw_pile":16,"discard_pile":0}
+{"ts":1700000160.2,"type":"nominate","consul":"Drusus","prefect":"Livia"}
+{"ts":1700000165,"type":"message","name":"Livia","text":"If the cards were bad, say so plainly.","stage":"debate"}
+{"ts":1700000166.2,"type":"message","name":"Marcus","text":"Fine by me, but I want a report afterwards.","stage":"debate"}
+{"ts":1700000168.3,"type":"message","name":"Octavia","text":"Speak up, the quiet ones worry me most.","stage":"debate"}
+{"ts":1700000171.3,"type":"message","name":"Aurelia","text":"Whoever hid a card owes us an explanation.","stage":"debate"}
+{"ts":1700000175.2,"type":"message","name":"Brutus","text":"Let us not repeat the last mistake.","stage":"debate"}
+{"ts":1700000180,"type":"message","name":"Cato","text":"Somebody at this table is lying about the cards.","stage":"debate"}
+{"ts":1700000181.2,"type":"message","name":"Drusus","text":"Careful, accusations without cards are just noise.","stage":"debate"}
+{"ts":1700000183.3,"type":"vote","voter":"Aurelia","aye":true}
+{"ts":1700000186.3,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000190.2,"type":"vote","voter":"Cato","aye":false}
+{"ts":1700000195,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000196.2,"type":"vote","voter":"Livia","aye":true}
+{"ts":1700000198.3,"type":"vote","voter":"Marcus","aye":true}
+{"ts":1700000201.3,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000205.2,"type":"vote_result","passed":true,"ayes":6,"nays":1,"tracker":0}
+{"ts":1700000210,"type":"draw","spoiler":true,"consul":"Drusus","laws":["reform","decree","decree"]}
+{"ts":1700000211.2,"type":"discard","spoiler":true,"by":"Drusus","law":"decree"}
+{"ts":1700000213.3,"type":"discard","spoiler":true,"by":"Livia","law":"reform"}
+{"ts":1700000216.3,"type":"enact","law":"decree","by":"Livia","reforms":0,"decrees":2,"tracker":0}
+{"ts":1700000220.2,"type":"power","kind":"investigate","by":"Drusus","target":"Octavia"}
+{"ts":1700000225,"type":"power_result","spoiler":true,"kind":"investigate","by":"Drusus","target":"Octavia","result":"loyalist"}
+{"ts":1700000226.2,"type":"message","name":"Brutus","text":"Let us not repeat the last mistake.","stage":"report"}
+{"ts":1700000228.3,"type":"message","name":"Cato","text":"Somebody at this table is lying about the cards.","stage":"report"}
+{"ts":1700000231.3,"type":"message","name":"Drusus","text":"I drew two decrees and a reform and passed on a decree. I looked at Octavia: loyalist.","stage":"report"}
+{"ts":1700000235.2,"type":"message","name":"Livia","text":"Drusus gave me a decree and a reform. I took the decree; the reform was dead weight.","stage":"report"}
+{"ts":1700000240,"type":"message","name":"Marcus","text":"Fine by me, but I want a report afterwards.","stage":"report"}
+{"ts":1700000241.2,"type":"message","name":"Octavia","text":"Speak up, the quiet ones worry me most.","stage":"report"}
+{"ts":1700000243.3,"type":"message","name":"Aurelia","text":"Whoever hid a card owes us an explanation.","stage":"report"}
+{"ts":1700000246.3,"type":"round","n":5,"consul":"Livia","tracker":0,"draw_pile":13,"discard_pile":2}
+{"ts":1700000250.2,"type":"nominate","consul":"Livia","prefect":"Aurelia"}
+{"ts":1700000255,"type":"message","name":"Marcus","text":"I would rather act than argue.","stage":"debate"}
+{"ts":1700000256.2,"type":"message","name":"Octavia","text":"Our side needs reforms and this is the way to get them.","stage":"debate"}
+{"ts":1700000258.3,"type":"message","name":"Aurelia","text":"Votes first, stories later.","stage":"debate"}
+{"ts":1700000261.3,"type":"message","name":"Brutus","text":"I will back anyone who has a clean record so far.","stage":"debate"}
+{"ts":1700000265.2,"type":"message","name":"Cato","text":"I count the decrees and I do not like the number.","stage":"debate"}
+{"ts":1700000270,"type":"message","name":"Drusus","text":"A fair slate. I will vote with the majority.","stage":"debate"}
+{"ts":1700000271.2,"type":"message","name":"Livia","text":"I have nothing to hide and I will say so every time.","stage":"debate"}
+{"ts":1700000273.3,"type":"vote","voter":"Aurelia","aye":true}
+{"ts":1700000276.3,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000280.2,"type":"vote","voter":"Cato","aye":true}
+{"ts":1700000285,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000286.2,"type":"vote","voter":"Livia","aye":true}
+{"ts":1700000288.3,"type":"vote","voter":"Marcus","aye":true}
+{"ts":1700000291.3,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000295.2,"type":"vote_result","passed":true,"ayes":7,"nays":0,"tracker":0}
+{"ts":1700000300,"type":"draw","spoiler":true,"consul":"Livia","laws":["reform","reform","decree"]}
+{"ts":1700000301.2,"type":"discard","spoiler":true,"by":"Livia","law":"reform"}
+{"ts":1700000303.3,"type":"discard","spoiler":true,"by":"Aurelia","law":"decree"}
+{"ts":1700000306.3,"type":"enact","law":"reform","by":"Aurelia","reforms":1,"decrees":2,"tracker":0}
+{"ts":1700000310.2,"type":"message","name":"Cato","text":"I count the decrees and I do not like the number.","stage":"report"}
+{"ts":1700000315,"type":"message","name":"Drusus","text":"A fair slate. I will vote with the majority.","stage":"report"}
+{"ts":1700000316.2,"type":"message","name":"Livia","text":"Two reforms and a decree. I handed Aurelia one of each.","stage":"report"}
+{"ts":1700000318.3,"type":"message","name":"Marcus","text":"I would rather act than argue.","stage":"report"}
+{"ts":1700000321.3,"type":"message","name":"Octavia","text":"Our side needs reforms and this is the way to get them.","stage":"report"}
+{"ts":1700000325.2,"type":"message","name":"Aurelia","text":"I got a reform and a decree and enacted the reform, as you see.","stage":"report"}
+{"ts":1700000330,"type":"message","name":"Brutus","text":"I will back anyone who has a clean record so far.","stage":"report"}
+{"ts":1700000331.2,"type":"round","n":6,"consul":"Marcus","tracker":0,"draw_pile":10,"discard_pile":4}
+{"ts":1700000333.3,"type":"nominate","consul":"Marcus","prefect":"Octavia"}
+{"ts":1700000336.3,"type":"message","name":"Octavia","text":"I keep a list of who voted how. It is telling.","stage":"debate"}
+{"ts":1700000340.2,"type":"message","name":"Aurelia","text":"I want a government we can all read. Show me your reasons.","stage":"debate"}
+{"ts":1700000345,"type":"message","name":"Brutus","text":"Three failures in a row would hand the Senate to chance.","stage":"debate"}
+{"ts":1700000346.2,"type":"message","name":"Cato","text":"This pairing worries me. Why this Prefect?","stage":"debate"}
+{"ts":1700000348.3,"type":"message","name":"Drusus","text":"I am only a humble senator; I follow the evidence.","stage":"debate"}
+{"ts":1700000351.3,"type":"message","name":"Livia","text":"The tracker is climbing. We need a government now.","stage":"debate"}
+{"ts":1700000355.2,"type":"message","name":"Marcus","text":"Give the pair a chance; we learn nothing from a failed vote.","stage":"debate"}
+{"ts":1700000360,"type":"vote","voter":"Aurelia","aye":false}
+{"ts":1700000361.2,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000363.3,"type":"vote","voter":"Cato","aye":false}
+{"ts":1700000366.3,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000370.2,"type":"vote","voter":"Livia","aye":true}
+{"ts":1700000375,"type":"vote","voter":"Marcus","aye":true}
+{"ts":1700000376.2,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000378.3,"type":"vote_result","passed":true,"ayes":5,"nays":2,"tracker":0}
+{"ts":1700000381.3,"type":"draw","spoiler":true,"consul":"Marcus","laws":["decree","decree","decree"]}
+{"ts":1700000385.2,"type":"discard","spoiler":true,"by":"Marcus","law":"decree"}
+{"ts":1700000390,"type":"discard","spoiler":true,"by":"Octavia","law":"decree"}
+{"ts":1700000391.2,"type":"enact","law":"decree","by":"Octavia","reforms":1,"decrees":3,"tracker":0}
+{"ts":1700000393.3,"type":"power","kind":"special_election","by":"Marcus","target":"Brutus"}
+{"ts":1700000396.3,"type":"message","name":"Drusus","text":"I am only a humble senator; I follow the evidence.","stage":"report"}
+{"ts":1700000400.2,"type":"message","name":"Livia","text":"The tracker is climbing. We need a government now.","stage":"report"}
+{"ts":1700000405,"type":"message","name":"Marcus","text":"Three decrees. I gave Octavia two and she had no choice. Brutus, you are up.","stage":"report"}
+{"ts":1700000406.2,"type":"message","name":"Octavia","text":"Two decrees, yes. That was not my doing.","stage":"report"}
+{"ts":1700000408.3,"type":"message","name":"Aurelia","text":"I want a government we can all read. Show me your reasons.","stage":"report"}
+{"ts":1700000411.3,"type":"message","name":"Brutus","text":"Three failures in a row would hand the Senate to chance.","stage":"report"}
+{"ts":1700000415.2,"type":"message","name":"Cato","text":"This pairing worries me. Why this Prefect?","stage":"report"}
+{"ts":1700000420,"type":"round","n":7,"consul":"Brutus","tracker":0,"draw_pile":7,"discard_pile":6}
+{"ts":1700000421.2,"type":"nominate","consul":"Brutus","prefect":"Cato"}
+{"ts":1700000423.3,"type":"message","name":"Aurelia","text":"Whoever hid a card owes us an explanation.","stage":"debate"}
+{"ts":1700000426.3,"type":"message","name":"Brutus","text":"Let us not repeat the last mistake.","stage":"debate"}
+{"ts":1700000430.2,"type":"message","name":"Cato","text":"Somebody at this table is lying about the cards.","stage":"debate"}
+{"ts":1700000435,"type":"message","name":"Drusus","text":"Careful, accusations without cards are just noise.","stage":"debate"}
+{"ts":1700000436.2,"type":"message","name":"Livia","text":"If the cards were bad, say so plainly.","stage":"debate"}
+{"ts":1700000438.3,"type":"message","name":"Marcus","text":"Fine by me, but I want a report afterwards.","stage":"debate"}
+{"ts":1700000441.3,"type":"message","name":"Octavia","text":"Speak up, the quiet ones worry me most.","stage":"debate"}
+{"ts":1700000445.2,"type":"vote","voter":"Aurelia","aye":true}
+{"ts":1700000450,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000451.2,"type":"vote","voter":"Cato","aye":true}
+{"ts":1700000453.3,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000456.3,"type":"vote","voter":"Livia","aye":false}
+{"ts":1700000460.2,"type":"vote","voter":"Marcus","aye":false}
+{"ts":1700000465,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000466.2,"type":"vote_result","passed":true,"ayes":5,"nays":2,"tracker":0}
+{"ts":1700000468.3,"type":"draw","spoiler":true,"consul":"Brutus","laws":["reform","decree","reform"]}
+{"ts":1700000471.3,"type":"discard","spoiler":true,"by":"Brutus","law":"decree"}
+{"ts":1700000475.2,"type":"discard","spoiler":true,"by":"Cato","law":"reform"}
+{"ts":1700000480,"type":"enact","law":"reform","by":"Cato","reforms":2,"decrees":3,"tracker":0}
+{"ts":1700000481.2,"type":"message","name":"Livia","text":"If the cards were bad, say so plainly.","stage":"report"}
+{"ts":1700000483.3,"type":"message","name":"Marcus","text":"Fine by me, but I want a report afterwards.","stage":"report"}
+{"ts":1700000486.3,"type":"message","name":"Octavia","text":"Speak up, the quiet ones worry me most.","stage":"report"}
+{"ts":1700000490.2,"type":"message","name":"Aurelia","text":"Whoever hid a card owes us an explanation.","stage":"report"}
+{"ts":1700000495,"type":"message","name":"Brutus","text":"Reform, decree, reform. I kept the decree out of it.","stage":"report"}
+{"ts":1700000496.2,"type":"message","name":"Cato","text":"Two reforms for me, I enacted one. The tally is two and four.","stage":"report"}
+{"ts":1700000498.3,"type":"message","name":"Drusus","text":"Careful, accusations without cards are just noise.","stage":"report"}
+{"ts":1700000501.3,"type":"round","n":8,"consul":"Octavia","tracker":0,"draw_pile":4,"discard_pile":8}
+{"ts":1700000505.2,"type":"nominate","consul":"Octavia","prefect":"Brutus"}
+{"ts":1700000510,"type":"message","name":"Brutus","text":"I will back anyone who has a clean record so far.","stage":"debate"}
+{"ts":1700000511.2,"type":"message","name":"Cato","text":"I count the decrees and I do not like the number.","stage":"debate"}
+{"ts":1700000513.3,"type":"message","name":"Drusus","text":"A fair slate. I will vote with the majority.","stage":"debate"}
+{"ts":1700000516.3,"type":"message","name":"Livia","text":"I have nothing to hide and I will say so every time.","stage":"debate"}
+{"ts":1700000520.2,"type":"message","name":"Marcus","text":"I would rather act than argue.","stage":"debate"}
+{"ts":1700000525,"type":"message","name":"Octavia","text":"Our side needs reforms and this is the way to get them.","stage":"debate"}
+{"ts":1700000526.2,"type":"message","name":"Aurelia","text":"Votes first, stories later.","stage":"debate"}
+{"ts":1700000528.3,"type":"vote","voter":"Aurelia","aye":true}
+{"ts":1700000531.3,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000535.2,"type":"vote","voter":"Cato","aye":true}
+{"ts":1700000540,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000541.2,"type":"vote","voter":"Livia","aye":false}
+{"ts":1700000543.3,"type":"vote","voter":"Marcus","aye":true}
+{"ts":1700000546.3,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000550.2,"type":"vote_result","passed":true,"ayes":6,"nays":1,"tracker":0}
+{"ts":1700000555,"type":"draw","spoiler":true,"consul":"Octavia","laws":["decree","decree","decree"]}
+{"ts":1700000556.2,"type":"discard","spoiler":true,"by":"Octavia","law":"decree"}
+{"ts":1700000558.3,"type":"discard","spoiler":true,"by":"Brutus","law":"decree"}
+{"ts":1700000561.3,"type":"enact","law":"decree","by":"Brutus","reforms":2,"decrees":4,"tracker":0}
+{"ts":1700000565.2,"type":"power","kind":"execution","by":"Octavia","target":"Marcus"}
+{"ts":1700000570,"type":"executed","name":"Marcus"}
+{"ts":1700000571.2,"type":"message","name":"Octavia","text":"Three decrees. I had no clean hand. Marcus gave us the third on a plate, so he goes.","stage":"report"}
+{"ts":1700000573.3,"type":"message","name":"Aurelia","text":"Votes first, stories later.","stage":"report"}
+{"ts":1700000576.3,"type":"message","name":"Brutus","text":"Two decrees reached me, I had to enact one.","stage":"report"}
+{"ts":1700000580.2,"type":"message","name":"Cato","text":"I count the decrees and I do not like the number.","stage":"report"}
+{"ts":1700000585,"type":"message","name":"Drusus","text":"A fair slate. I will vote with the majority.","stage":"report"}
+{"ts":1700000586.2,"type":"message","name":"Livia","text":"I have nothing to hide and I will say so every time.","stage":"report"}
+{"ts":1700000588.3,"type":"round","n":9,"consul":"Aurelia","tracker":0,"draw_pile":1,"discard_pile":10}
+{"ts":1700000591.3,"type":"nominate","consul":"Aurelia","prefect":"Livia"}
+{"ts":1700000595.2,"type":"message","name":"Drusus","text":"I am only a humble senator; I follow the evidence.","stage":"debate"}
+{"ts":1700000600,"type":"message","name":"Livia","text":"The tracker is climbing. We need a government now.","stage":"debate"}
+{"ts":1700000601.2,"type":"message","name":"Octavia","text":"I keep a list of who voted how. It is telling.","stage":"debate"}
+{"ts":1700000603.3,"type":"message","name":"Aurelia","text":"I want a government we can all read. Show me your reasons.","stage":"debate"}
+{"ts":1700000606.3,"type":"message","name":"Brutus","text":"Three failures in a row would hand the Senate to chance.","stage":"debate"}
+{"ts":1700000610.2,"type":"message","name":"Cato","text":"This pairing worries me. Why this Prefect?","stage":"debate"}
+{"ts":1700000615,"type":"vote","voter":"Aurelia","aye":true}
+{"ts":1700000616.2,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000618.3,"type":"vote","voter":"Cato","aye":true}
+{"ts":1700000621.3,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000625.2,"type":"vote","voter":"Livia","aye":true}
+{"ts":1700000630,"type":"vote","voter":"Octavia","aye":false}
+{"ts":1700000631.2,"type":"vote_result","passed":true,"ayes":5,"nays":1,"tracker":0}
+{"ts":1700000633.3,"type":"reshuffle","draw_pile":11}
+{"ts":1700000636.3,"type":"draw","spoiler":true,"consul":"Aurelia","laws":["decree","reform","reform"]}
+{"ts":1700000640.2,"type":"discard","spoiler":true,"by":"Aurelia","law":"reform"}
+{"ts":1700000645,"type":"discard","spoiler":true,"by":"Livia","law":"reform"}
+{"ts":1700000646.2,"type":"enact","law":"decree","by":"Livia","reforms":2,"decrees":5,"tracker":0}
+{"ts":1700000648.3,"type":"power","kind":"execution","by":"Aurelia","target":"Cato"}
+{"ts":1700000651.3,"type":"executed","name":"Cato"}
+{"ts":1700000655.2,"type":"message","name":"Brutus","text":"Three failures in a row would hand the Senate to chance.","stage":"report"}
+{"ts":1700000660,"type":"message","name":"Drusus","text":"I am only a humble senator; I follow the evidence.","stage":"report"}
+{"ts":1700000661.2,"type":"message","name":"Livia","text":"The tracker is climbing. We need a government now.","stage":"report"}
+{"ts":1700000663.3,"type":"message","name":"Octavia","text":"I keep a list of who voted how. It is telling.","stage":"report"}
+{"ts":1700000666.3,"type":"message","name":"Aurelia","text":"Two reforms and a decree. Livia enacted the decree. Cato, I am sorry, but your votes worried me.","stage":"report"}
+{"ts":1700000670.2,"type":"round","n":10,"consul":"Brutus","tracker":0,"draw_pile":8,"discard_pile":2}
+{"ts":1700000675,"type":"nominate","consul":"Brutus","prefect":"Octavia"}
+{"ts":1700000676.2,"type":"message","name":"Aurelia","text":"Whoever hid a card owes us an explanation.","stage":"debate"}
+{"ts":1700000678.3,"type":"message","name":"Brutus","text":"Let us not repeat the last mistake.","stage":"debate"}
+{"ts":1700000681.3,"type":"message","name":"Drusus","text":"Careful, accusations without cards are just noise.","stage":"debate"}
+{"ts":1700000685.2,"type":"message","name":"Livia","text":"If the cards were bad, say so plainly.","stage":"debate"}
+{"ts":1700000690,"type":"message","name":"Octavia","text":"Speak up, the quiet ones worry me most.","stage":"debate"}
+{"ts":1700000691.2,"type":"vote","voter":"Aurelia","aye":true}
+{"ts":1700000693.3,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000696.3,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000700.2,"type":"vote","voter":"Livia","aye":true}
+{"ts":1700000705,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000706.2,"type":"vote_result","passed":true,"ayes":5,"nays":0,"tracker":0}
+{"ts":1700000708.3,"type":"draw","spoiler":true,"consul":"Brutus","laws":["decree","decree","decree"]}
+{"ts":1700000711.3,"type":"discard","spoiler":true,"by":"Brutus","law":"decree"}
+{"ts":1700000715.2,"type":"veto","prefect":"Octavia","consul":"Brutus","accepted":true,"tracker":1}
+{"ts":1700000720,"type":"round","n":11,"consul":"Drusus","tracker":1,"draw_pile":5,"discard_pile":5}
+{"ts":1700000721.2,"type":"nominate","consul":"Drusus","prefect":"Brutus"}
+{"ts":1700000723.3,"type":"message","name":"Brutus","text":"I will back anyone who has a clean record so far.","stage":"debate"}
+{"ts":1700000726.3,"type":"message","name":"Drusus","text":"A fair slate. I will vote with the majority.","stage":"debate"}
+{"ts":1700000730.2,"type":"message","name":"Livia","text":"I have nothing to hide and I will say so every time.","stage":"debate"}
+{"ts":1700000735,"type":"message","name":"Octavia","text":"Our side needs reforms and this is the way to get them.","stage":"debate"}
+{"ts":1700000736.2,"type":"message","name":"Aurelia","text":"Votes first, stories later.","stage":"debate"}
+{"ts":1700000738.3,"type":"vote","voter":"Aurelia","aye":false}
+{"ts":1700000741.3,"type":"vote","voter":"Brutus","aye":true}
+{"ts":1700000745.2,"type":"vote","voter":"Drusus","aye":true}
+{"ts":1700000750,"type":"vote","voter":"Livia","aye":true}
+{"ts":1700000751.2,"type":"vote","voter":"Octavia","aye":true}
+{"ts":1700000753.3,"type":"vote_result","passed":true,"ayes":4,"nays":1,"tracker":1}
+{"ts":1700000756.3,"type":"draw","spoiler":true,"consul":"Drusus","laws":["decree","decree","decree"]}
+{"ts":1700000760.2,"type":"discard","spoiler":true,"by":"Drusus","law":"decree"}
+{"ts":1700000765,"type":"veto","prefect":"Brutus","consul":"Drusus","accepted":false,"tracker":1}
+{"ts":1700000766.2,"type":"discard","spoiler":true,"by":"Brutus","law":"decree"}
+{"ts":1700000768.3,"type":"enact","law":"decree","by":"Brutus","reforms":2,"decrees":6,"tracker":0}
+{"ts":1700000771.3,"type":"game_over","winner":"conspiracy","reason":"decrees","roles":{"Aurelia":"loyalist","Brutus":"loyalist","Cato":"loyalist","Drusus":"usurper","Livia":"conspirator","Marcus":"conspirator","Octavia":"loyalist"}}

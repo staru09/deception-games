@@ -1,0 +1,8 @@
+{"players": [{"role": "usurper", "model": "anthropic/claude-sonnet-5.5"},
+             {"role": "conspirator", "model": "openai/gpt-5-mini"},
+             {"role": "loyalist", "model": "openai/gpt-5-mini"},
+             {"role": "loyalist", "model": "openai/gpt-5-mini"},
+             {"role": "loyalist", "model": "openai/gpt-5-mini"},
+             {"role": "loyalist", "model": "openai/gpt-5-mini"}],
+ "shuffle_roles": false, "discussion_rounds": 1,
+ "llm_defaults": {"reasoning": {"effort": "low"}}}

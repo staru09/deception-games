@@ -1,0 +1,9 @@
+{"players": [{"role": "usurper", "model": "mock"},
+             {"role": "conspirator", "model": "mock"},
+             {"role": "conspirator", "model": "mock"},
+             {"role": "loyalist", "model": "mock"},
+             {"role": "loyalist", "model": "mock"},
+             {"role": "loyalist", "model": "mock"},
+             {"role": "loyalist", "model": "mock"}],
+ "shuffle_roles": false, "discussion_rounds": 1,
+ "llm_defaults": {"mock_latency_seconds": 0.2}}

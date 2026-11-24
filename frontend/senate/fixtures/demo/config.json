@@ -1,0 +1,64 @@
+{
+ "game": "senate",
+ "discussion_rounds": 1,
+ "seed": 7,
+ "first_consul": "Aurelia",
+ "players": [
+  {
+   "name": "Aurelia",
+   "model": "mock",
+   "role": "loyalist",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  },
+  {
+   "name": "Brutus",
+   "model": "mock",
+   "role": "loyalist",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  },
+  {
+   "name": "Cato",
+   "model": "mock",
+   "role": "loyalist",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  },
+  {
+   "name": "Drusus",
+   "model": "mock",
+   "role": "usurper",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  },
+  {
+   "name": "Livia",
+   "model": "mock",
+   "role": "conspirator",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  },
+  {
+   "name": "Marcus",
+   "model": "mock",
+   "role": "conspirator",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  },
+  {
+   "name": "Octavia",
+   "model": "mock",
+   "role": "loyalist",
+   "llm_config": {
+    "model_name": "mock"
+   }
+  }
+ ]
+}

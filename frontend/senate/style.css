@@ -1,0 +1,95 @@
+/* Senate viewer, on top of ../common/arena.css. Reform / Loyalists use --good, Decree / Conspiracy
+   use --bad; every colour-coded thing also says its name in words. */
+body { padding: 0 16px 24px; }
+.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; max-width: 1280px; margin: 0 auto; padding: 14px 0 10px; }
+.top h1 { font-size: 22px; }
+.back { color: var(--muted); text-decoration: none; font-size: 13px; }
+.back:hover { color: var(--gold); }
+.meta { color: var(--muted); font-size: 13px; margin-left: auto; }
+.empty { max-width: 480px; margin: 40px auto; padding: 24px; text-align: center; }
+
+main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-areas: 'ctl ctl' 'board log'; gap: 12px; max-width: 1280px; margin: 0 auto; }
+.rp-wrap { grid-area: ctl; }
+main > *, .tracks > * { min-width: 0; }
+.board { container-type: inline-size; grid-area: board; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.log { grid-area: log; display: flex; flex-direction: column; max-height: calc(100vh - 150px); min-height: 360px; padding: 12px 14px; overflow: hidden; }
+.log h2 { font-size: 14px; margin-bottom: 8px; }
+.log ol { list-style: none; margin: 0; padding: 0 4px 0 0; display: grid; gap: 6px; align-content: start; overflow-y: auto; flex: 1; min-width: 0; }
+
+/* law tracks */
+.tracks { display: grid; grid-template-columns: 5fr 6fr; gap: 10px 16px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.tracks h3 { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 6px; }
+.tracks h3 span { font: 12px var(--mono); color: var(--muted); }
+.track { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+.slot { aspect-ratio: 3 / 4; max-height: 96px; border: 1.5px dashed var(--line-strong); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; color: var(--muted); padding: 2px; }
+.slot small { font-size: 9px; overflow-wrap: anywhere; line-height: 1.1; }
+.slot b { font-size: 10px; font-family: var(--head); text-transform: uppercase; letter-spacing: .04em; }
+.slot.full { border-style: solid; color: #fff; }
+.slot.reform.full { background: var(--good); border-color: var(--good); }
+.slot.decree.full { background: var(--bad); border-color: var(--bad); }
+.slot.full .ic, .slot.full small { display: none; }
+.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fails { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.fails h3 { margin: 0; }
+.dots { display: inline-flex; gap: 6px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--line-strong); }
+.dot.on { background: var(--gold); border-color: var(--gold); }
+.fails small { color: var(--muted); margin-left: auto; font-size: 12px; }
+
+/* seats */
+.seats { list-style: none; margin: 0; padding: 0; position: relative; height: 330px; margin: 0 54px 4px; }  /* half a seat, so the outer seats stay inside */
+.seat { position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%); width: 108px; padding: 6px 8px; text-align: center; background: var(--panel-solid); border: 1.5px solid var(--line-strong); border-radius: 12px; display: grid; gap: 3px; justify-items: center; }
+.seat.good { border-color: var(--good); } .seat.bad { border-color: var(--bad); }
+.seat.speaking { box-shadow: 0 0 0 3px var(--gold); }
+.seat.dead { opacity: .5; } .seat.dead .nm { text-decoration: line-through; }
+.nm { font-family: var(--head); font-size: 14px; overflow-wrap: anywhere; }
+.tags { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
+.badge { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 99px; border: 1px solid var(--line-strong); color: var(--muted); }
+.badge.consul { background: var(--gold); border-color: var(--gold); color: #1a1e29; }
+.badge.prefect { background: var(--night); border-color: var(--night); color: #fff; }
+.badge.good { color: var(--good); border-color: var(--good); } .badge.bad { color: var(--bad); border-color: var(--bad); }
+.chip { font-size: 12px; font-weight: 700; padding: 1px 12px; border-radius: 6px; color: #fff; }
+.chip.aye { background: var(--good); } .chip.nay { background: var(--bad); }
+.x { font-size: 11px; color: var(--bad); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+/* stage */
+.stage { padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); min-height: 120px; }
+.stage.good { border-color: var(--good); } .stage.bad { border-color: var(--bad); }
+.stage h2 { font-size: 20px; margin-bottom: 6px; }
+.stage p { margin: 6px 0 0; }
+.stage .secret { color: var(--gold); }
+.stage blockquote { margin: 10px 0 0; padding: 6px 12px; border-left: 3px solid var(--gold); color: var(--muted); }
+.stage blockquote b { color: var(--text); }
+.hand { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.hand small { color: var(--muted); }
+.law { display: inline-grid; place-items: center; width: 62px; height: 84px; border-radius: 8px; color: #fff; font-family: var(--head); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; border: 2px solid rgba(255,255,255,.35); }
+.law.reform { background: var(--good); } .law.decree { background: var(--bad); }
+.law.back { background: repeating-linear-gradient(45deg, var(--night), var(--night) 6px, var(--panel-solid) 6px, var(--panel-solid) 12px); font-size: 22px; }
+
+/* transcript */
+.rd { margin-top: 8px; font: 600 12px var(--head); letter-spacing: .05em; text-transform: uppercase; border-bottom: 1px solid var(--line); padding-bottom: 2px; }
+.rd span { font: 12px var(--body); text-transform: none; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.msg b { font-size: 13px; }
+.msg em { font-size: 10px; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 0 6px; margin-left: 6px; font-style: normal; }
+.msg p { margin: 1px 0 0; }
+.msg p, .sys, .stage blockquote, .stage { overflow-wrap: anywhere; }
+.sys { font-size: 12.5px; color: var(--muted); padding-left: 8px; border-left: 3px solid var(--line-strong); }
+.sys.good { border-left-color: var(--good); } .sys.bad { border-left-color: var(--bad); } .sys.warn { border-left-color: var(--gold); }
+.sys.secret { color: var(--gold); font-style: italic; }
+
+@media (max-width: 860px) {
+  main { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'ctl' 'board' 'log'; }
+  .log { max-height: 420px; }
+}
+@media (max-width: 640px) {
+  .tracks { grid-template-columns: 1fr; }
+  .slot b { font-size: 8px; letter-spacing: 0; }
+}
+/* the arc needs about 110 px per seat; below that, a grid of seats (container = the board column) */
+@container (max-width: 670px) { .seats.n5 { margin: 0; height: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; } .seats.n5 .seat { position: static; transform: none; width: auto; } }
+@container (max-width: 780px) { .seats.n6 { margin: 0; height: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; } .seats.n6 .seat { position: static; transform: none; width: auto; } }
+@container (max-width: 890px) { .seats.n7 { margin: 0; height: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; } .seats.n7 .seat { position: static; transform: none; width: auto; } }
+@container (max-width: 1000px) { .seats.n8 { margin: 0; height: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; } .seats.n8 .seat { position: static; transform: none; width: auto; } }
+@container (max-width: 1110px) { .seats.n9 { margin: 0; height: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; } .seats.n9 .seat { position: static; transform: none; width: auto; } }
+@container (max-width: 1220px) { .seats.n10 { margin: 0; height: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; } .seats.n10 .seat { position: static; transform: none; width: auto; } }
+@container (max-width: 760px) { .slot small { display: none; } }   /* icon + title only */
