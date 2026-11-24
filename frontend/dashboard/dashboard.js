@@ -266,18 +266,13 @@ async function start() {
 
 // ---------- launchers ----------
 
+// Only what is running now, in the game's header: a launcher's log stays in backend/launches/.
 function renderLaunchers() {
-  const list = launchers.filter((l) => !route || l.game === route);
-  $('launchers').replaceChildren(...(list.length ? list.map((l) => h('article', { class: 'launcher' },
-    h('div', { class: 'launcher-head' },
-      h('strong', { text: games?.[l.game]?.title ?? l.game }),
-      h('span', { class: 'badge ' + (l.running ? 'live' : l.exit_code === 0 ? 'finished' : 'aborted'),
-        // "unknown": it ended while no server watched it (it outlives a server restart)
-        text: l.running ? 'running' : l.exit_code === 'unknown' ? 'ended' : `exited ${l.exit_code}` }),
-      h('span', { class: 'muted small', text: `pid ${l.pid} · ${l.games} × ${l.parallel} parallel · ${when(l.started)} · ${l.table}` }),
-      l.running && h('button', { type: 'button', class: 'btn danger', text: 'Stop', onclick: () => stopLauncher(l) })),
-    h('pre', { class: 'log', text: l.log.join('\n') || '(no output yet)' })))
-    : [h('p', { class: 'muted', text: `No launcher started by this server${route ? ' for this game' : ''}.` })]));
+  const running = route ? launchers.filter((l) => l.running && l.game === route) : [];
+  $('g-running').replaceChildren(...running.map((l) => h('div', { class: 'run-pill' },
+    h('span', { class: 'dot', 'aria-hidden': 'true' }),
+    h('span', { text: `Running since ${when(l.started)}` }),
+    h('button', { type: 'button', class: 'btn danger', text: 'Stop', onclick: () => stopLauncher(l) }))));
 }
 
 async function stopLauncher(l) {

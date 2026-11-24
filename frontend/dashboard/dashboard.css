@@ -166,7 +166,7 @@ p { margin: 0; }
   width: 54px; height: 54px; padding: 10px; flex: none; border-radius: 50%; color: var(--accent);
   border: 2px solid var(--gold); background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
-.cols, .launchers-panel { max-width: 760px; }
+.cols { max-width: 760px; }
 .cols { display: grid; gap: 16px; }
 #g-viewer { justify-self: start; text-decoration: none; }
 #g-viewer:hover { background: var(--gold); color: var(--ink-on-gold); }
@@ -203,12 +203,13 @@ input[type="checkbox"] { height: auto; accent-color: var(--gold); }
 .status { margin-top: 10px; min-height: 1.4em; overflow-wrap: anywhere; white-space: pre-wrap; }
 .status.bad { color: var(--bad); }
 
-/* ---------- launchers (the log is the last 15 lines: shown whole, nothing to scroll) ---------- */
-.launchers-panel { margin-top: 16px; }
-.launchers { display: grid; gap: 12px; }
-.launcher-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-.launcher-head .btn { margin-left: auto; }
-.log { margin: 8px 0 0; padding: 8px 10px; overflow: auto; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+/* ---------- a running launcher, in the game's header ---------- */
+.running { display: grid; gap: 8px; justify-items: start; }
+.running:empty { display: none; }
+.run-pill { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 6px 6px 6px 14px; border: 1px solid var(--bad); border-radius: 999px; font-size: 13px; }
+.run-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); animation: pulse 2s infinite; box-shadow: 0 0 0 0 var(--bad); }
+.run-pill .btn { height: 28px; border-radius: 999px; }
+@media (prefers-reduced-motion: reduce) { .run-pill .dot { animation: none; } }
 
 .confirm { width: min(480px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--gold-line); border-radius: var(--radius); background: var(--panel-solid); color: var(--text); }
 .confirm::backdrop { background: rgba(0, 0, 0, 0.55); }

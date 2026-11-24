@@ -30,7 +30,7 @@
     <div class="cards" id="cards"></div>
   </section>
 
-  <!-- #<game>: one game's stats, the New run panel and its launchers -->
+  <!-- #<game>: one game's stats, its running launchers (with Stop) and the New run panel -->
   <section id="game" hidden>
     <a class="back" href="#">← All games</a>
     <header class="game-head">
@@ -38,6 +38,7 @@
       <p class="muted" id="g-desc"></p>
       <dl class="stats" id="g-stats"></dl>
       <a class="enter" id="g-viewer" href="#">Open the viewer</a>
+      <div class="running" id="g-running" role="status"></div>
     </header>
     <div class="cols">
       <section class="glass panel" aria-labelledby="nr-h">
@@ -56,11 +57,6 @@
         <p class="status" id="nr-status" role="status"></p>
       </section>
     </div>
-
-    <section class="glass panel launchers-panel" aria-labelledby="launchers-h">
-      <h2 id="launchers-h">Launchers</h2>
-      <div class="launchers" id="launchers"></div>
-    </section>
   </section>
 </main>
 
