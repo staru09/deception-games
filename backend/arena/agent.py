@@ -21,7 +21,7 @@ class Agent:
         # 0 by default so selfchecks run instantly; a table can slow mocks down to watch them live
         self.mock_latency = llm_config.get(MOCK_LATENCY_KEY, 0)
         self.logger = Logger(name, game_dir)  # <Name>_log.txt and <Name>_reasoning.jsonl, as in Mafia
-        self.llm = None if self.is_mock else OpenRouterLLM(self.logger, **llm_config)
+        self.llm = None if self.is_mock else OpenRouterLLM(self.logger, STOP.is_set, **llm_config)
 
     @property
     def is_mock(self):

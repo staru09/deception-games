@@ -1,0 +1,14 @@
+{
+  "daytime_minutes": 1,
+  "nighttime_minutes": 0.5,
+  "shuffle_roles": true,
+  "variant": "misinformation",
+  "players": [
+    {"role": "mafia", "model": "mock"},
+    {"role": "detective", "model": "mock"},
+    {"role": "doctor", "model": "mock"},
+    {"role": "villager", "model": "mock"},
+    {"role": "villager", "model": "mock"},
+    {"role": "villager", "model": "mock"}
+  ]
+}

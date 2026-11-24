@@ -14,6 +14,7 @@ backend/
   configurations/
     senate/*.json   Senate table configs        poker/*.json   Poker table configs
     <game>/dashboard/<timestamp>.json   tables saved by the dashboard on launch
+    arena/mock.json  the mock game's table (arena.mockgame)
     models.json     the models offered in the dashboard's seat dropdowns
     *.json          Mafia's existing tables (variant "misinformation" or none)
   autonomous_games/ Mafia + Misinformation Mafia data ($LLMAFIA_GAMES_DIR)
@@ -168,7 +169,7 @@ Index `winner`: `"loyalists"` or `"conspiracy"`.
 Exactly 2 players. Blinds 1/2, every hand starts with 200 chips each (hands are independent).
 
 **config.json**: `{"players": [{"name", "model", "llm_config"}] (seat 0, seat 1), "hands",
-"blinds": [1, 2], "stack": 200, "seed", "pair": <int shared by both games of a pair> | null,
+"blinds": [1, 2], "stack": 200, "seed", "pair": <int shared by both games of a pair, unique across launches (the seed)> | null,
 "mirror": <bool, true for the second game of a pair>, "table_talk"}`.
 
 - The button is seat 0 in hand 1 and alternates. The button posts the small blind, acts first

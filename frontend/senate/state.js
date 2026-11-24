@@ -103,7 +103,10 @@ export function apply(s, ev) {
       sys(s, `${ev.name} is executed.`, 'bad');
       break;
     case 'game_over':
-      s.over = { winner: ev.winner, reason: ev.reason }; s.roles = ev.roles ?? {}; s.hand = null;
+      s.over = { winner: ev.winner, reason: ev.reason }; s.roles = ev.roles ?? {};
+      // usurper_elected ends the game before the three laws the vote_result took were drawn
+      if (s.hand?.cards === null && s.hand.n === 3) s.drawPile += 3;
+      s.hand = null;
       s.step = { kind: 'over' };
       sys(s, `${cap(ev.winner)} win (${ev.reason.replace('_', ' ')}).`, ev.winner === 'loyalists' ? 'good' : 'bad');
       break;

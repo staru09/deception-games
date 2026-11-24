@@ -26,8 +26,9 @@ THINK_BLOCK_PATTERN = r"<think>(.*?)</think>"
 
 class OpenRouterLLM:
 
-    def __init__(self, logger, **llm_config):
+    def __init__(self, logger, should_stop=lambda: False, **llm_config):
         self.logger = logger
+        self.should_stop = should_stop  # the arena's Stop: no further attempts, no backoff wait
         self.model_name = llm_config[MODEL_NAME_KEY]
         self.api_key = os.environ.get(OPENROUTER_API_KEY_KEYWORD)
         if not self.api_key:
@@ -82,6 +83,8 @@ class OpenRouterLLM:
         """Returns the response json, or None when every attempt failed."""
         headers = {"Authorization": f"Bearer {self.api_key}", "X-Title": "LLMafia"}
         for attempt in range(MAX_ATTEMPTS):
+            if self.should_stop():
+                break
             try:
                 response = requests.post(f"{BASE_URL}/chat/completions", json=body,
                                          headers=headers, timeout=REQUEST_TIMEOUT)
@@ -99,5 +102,8 @@ class OpenRouterLLM:
             print(f"OpenRouter error for {self.model_name}: {error}", flush=True)
             if not is_retryable:
                 break
-            time.sleep(2 ** attempt)
+            for _ in range(2 ** attempt * 10):  # in small steps, so a Stop ends the wait
+                if self.should_stop():
+                    return None
+                time.sleep(0.1)
         return None

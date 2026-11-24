@@ -1,5 +1,5 @@
 """The smallest arena game, to prove the core: everyone guesses a coin flip, first to 3 wins.
-    python -m arena.run mock configurations/arena_mock.json"""
+    python -m arena.run mock configurations/arena/mock.json"""
 import random
 
 from arena.agent import Agent, llm_config_for, model_problem

@@ -64,10 +64,14 @@ def mark_unfinished_aborted(root):
 
 def new_game_id(root):
     with LOCK:
-        taken = [int(path.name) for path in root.iterdir() if path.name.isdigit()]
-        game_id = f"{max(taken, default=0) + 1:04d}"
-        (root / game_id).mkdir(exist_ok=False)
-        return game_id
+        while True:
+            taken = [int(path.name) for path in root.iterdir() if path.name.isdigit()]
+            game_id = f"{max(taken, default=0) + 1:04d}"
+            try:
+                (root / game_id).mkdir()
+                return game_id
+            except FileExistsError:  # another launcher took it between the listing and the mkdir
+                continue
 
 
 def run_one(game, module, root, config, table_path, start_delay):
@@ -81,6 +85,7 @@ def run_one(game, module, root, config, table_path, start_delay):
         seats = {player["name"]: player["model"] for player in config["players"]}
         update_index(root, game_id, started=time.time(), models=sorted(set(seats.values())),
                      seats=seats, winner=None)
+    print(f"{game} {game_id}: started", flush=True)
     winner = ABORTED
     try:
         winner = module.play(config, game_dir, EventLog(game_dir / "events.jsonl"))

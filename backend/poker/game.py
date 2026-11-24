@@ -48,7 +48,7 @@ def make_configs(table, n):
         seed = random.randrange(2 ** 31)
         names = random.sample(OPTIONAL_CODE_NAMES, 4)  # new names in each game of a pair
         if duplicate:
-            configs += [config((0, 1), seed, k + 1, False, names[:2]), config((1, 0), seed, k + 1, True, names[2:])]
+            configs += [config((0, 1), seed, seed, False, names[:2]), config((1, 0), seed, seed, True, names[2:])]
         else:
             configs.append(config((0, 1), seed, None, False, names[:2]))
     return configs

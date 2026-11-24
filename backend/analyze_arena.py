@@ -64,7 +64,9 @@ def poker(games_dir):
     for game_dir, config, events in finished_games(games_dir):
         hands = [event for event in events if event["type"] == "hand_end"]
         for player in config["players"]:
-            rows.append({"game": game_dir.name, "pair": config.get("pair"), "name": player["name"],
+            # pair numbers repeat across launches; only the two games of a pair share a seed
+            pair = config["seed"] if config.get("pair") is not None else None
+            rows.append({"game": game_dir.name, "pair": pair, "name": player["name"],
                          "model": player["model"], "hands": len(hands), "big_blind": config["blinds"][1],
                          "chips": sum(hand["deltas"].get(player["name"], 0) for hand in hands),
                          **seat_usage(game_dir, player["name"])})

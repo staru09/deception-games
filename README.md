@@ -104,9 +104,11 @@ Two more deception games run next to Mafia, and a dashboard starts and lists run
 # checks (mock players only, no API calls)
 .venv/bin/python -m senate.selfcheck && .venv/bin/python -m poker.selfcheck && .venv/bin/python server.check.py
 node ../frontend/senate/state.check.mjs && node ../frontend/poker/state.check.mjs
+# replay finished mock games through the viewers (play some with arena.run first; pass their games dir)
+node ../frontend/senate/engine.check.mjs senate_games && node ../frontend/poker/engine.check.mjs poker_games
 ```
 
-- **Dashboard:** pick a game to see its runs (with Watch links), start a new run from a saved table or by editing the seats and their models, and stop a running launcher. Before any run with a real model it shows the models and a cost estimate (the average of that game's past runs) and asks for confirmation. Only one launcher runs per data directory (Mafia and Misinformation Mafia share one). Launchers keep running when the server stops or restarts; stop them from the dashboard.
+- **Dashboard:** pick a game to see its runs (with Watch links), start a new run from a saved table or by editing the seats and their models, and stop a running launcher. Before any run with a real model it shows the models and a cost estimate (the average of that game's past runs, scaled by hands/50 for Poker and by discussion rounds for Senate) and the table's llm_defaults and asks for confirmation. Only one launcher runs per data directory (Mafia and Misinformation Mafia share one). Launchers keep running when the server stops or restarts; stop them from the dashboard.
 - **Contract:** [docs/ARENA_CONTRACT.md](docs/ARENA_CONTRACT.md) fixes the events, data layout and API that the engines, viewers and server share.
 - **Output:** `backend/senate_games/` and `backend/poker_games/` (or `SENATE_GAMES_DIR`, `POKER_GAMES_DIR`), in the same format as Mafia's: `index.json`, and per game `config.json`, `events.jsonl` and each seat's `<Name>_log.txt` and `<Name>_reasoning.jsonl`.
 

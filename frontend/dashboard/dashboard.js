@@ -115,6 +115,8 @@ function pickTable() {
   draft = structuredClone(picked?.table ?? {});
   if (!Array.isArray(draft.players)) draft.players = [];
   for (const o of OPTIONS[route] ?? []) draft[o.key] ??= o.def;
+  // as in the experiment tables the average cost comes from; an empty table would run models at their own defaults
+  draft.llm_defaults ??= { reasoning: { effort: 'low' } };
   renderSeats();
   renderOptions();
   renderEstimate();
@@ -157,7 +159,7 @@ function renderOptions() {
       return h('label', { class: 'check' }, input, o.label);
     }
     input.value = draft[o.key];
-    input.addEventListener('input', () => { draft[o.key] = Number.parseInt(input.value, 10); });
+    input.addEventListener('input', () => { draft[o.key] = Number.parseInt(input.value, 10); renderEstimate(); });
     return h('label', { class: 'field' }, o.label, input);
   }));
 }
@@ -185,8 +187,12 @@ function estimate(table, n) {
   if (!usesRealModel(table)) return 'Estimated cost: $0 (mock seats only, no model is called)';
   const avg = games[route].avg_cost;
   const count = n * (route === 'poker' && table.duplicate !== false ? 2 : 1);   // duplicate: n pairs
-  if (avg == null) return `Estimated cost: unknown (no finished paid ${games[route].title} run to average) for ${count} games`;
-  return `Estimated cost: about ${money(avg * count)} (${money(avg)} per game × ${count} games)`;
+  const settings = ` Model settings (llm_defaults): ${JSON.stringify(table.llm_defaults ?? {})}.`;
+  if (avg == null) return `Estimated cost: unknown (no finished paid ${games[route].title} run to average) for ${count} games.${settings}`;
+  // assumption: the average comes from 50-hand Poker games and 1-round Senate discussions; cost grows linearly with both
+  const scale = route === 'poker' ? (table.hands ?? 50) / 50 : route === 'senate' ? (table.discussion_rounds ?? 1) : 1;
+  const per = avg * scale;
+  return `Estimated cost: about ${money(per * count)} (${money(per)} per game × ${count} games${scale !== 1 ? `, average scaled ×${scale}` : ''}).${settings}`;
 }
 
 function renderEstimate() {
@@ -204,7 +210,7 @@ function renderBudget() {
 function confirmPaid(table, n) {
   const dialog = $('confirm');
   $('confirm-text').textContent = `${n} × ${games[route].title} with ${$('nr-parallel').value} in parallel. `
-    + `${estimate(table, n)}. ${$('nr-budget').textContent}`;
+    + `${estimate(table, n)} ${$('nr-budget').textContent}`;
   $('confirm-models').replaceChildren(...paidModels(table).map((m) => h('li', { text: m })));
   dialog.returnValue = '';
   dialog.showModal();

@@ -372,6 +372,37 @@ def launch(body):
                  "log": os.path.relpath(log_path, BACKEND_DIR)}
 
 
+# A stopped launcher first waits out the model calls in flight (a billed answer is still logged),
+# which takes up to the 190 s request timeout; past this it is stuck and its group is killed.
+STOP_WAIT_SECONDS = 300
+LOOPBACK_HOSTS = ("127.0.0.1", "::1", "localhost")
+
+
+def is_alive(pid):
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        pass
+    return True
+
+
+def kill_group_later(pgid, child):
+    """A launcher that got SIGTERM ends its games itself. Once it has exited (or after
+    STOP_WAIT_SECONDS, stuck), SIGKILL whatever of its group is still alive: game processes a launcher
+    killed hard left playing. The launcher is its own session leader, so its group holds nothing
+    else. Never killed while the launcher still waits for an answer it will log."""
+    deadline = time.time() + STOP_WAIT_SECONDS
+    while time.time() < deadline and (child.poll() is None if child else is_alive(pgid)):
+        time.sleep(1)
+    time.sleep(2)  # its game processes get a moment to end after their launcher
+    try:
+        os.killpg(pgid, signal.SIGKILL)
+    except ProcessLookupError:  # the whole group has ended
+        pass
+
+
 def stop(body):
     pid = body.get("pid")
     records = [r for r in launch_records() if type(pid) is int and r.get("pid") == pid]
@@ -388,6 +419,7 @@ def stop(body):
             os.kill(pid, signal.SIGTERM)
         except ProcessLookupError:  # it ended in between
             return 409, {"error": "that launcher has already finished"}
+    threading.Thread(target=kill_group_later, args=(pid, child), daemon=True).start()
     print(f"Stopped {record['game']} (pid {pid})", flush=True)  # it aborts its games, marks them
     return 200, {"pid": pid, "stopping": True}
 
@@ -530,6 +562,9 @@ def main():
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--host", default="127.0.0.1")
     args = parser.parse_args()
+    if args.host not in LOOPBACK_HOSTS:  # the API starts paid runs and has no login
+        sys.exit(f"Refusing --host {args.host}: the arena must listen on loopback only. "
+                 f"To reach it from another machine use an SSH tunnel: ssh -L 8000:127.0.0.1:8000 <host>")
     Handler.allowed_hosts = Handler.allowed_hosts | {args.host}
     print(f"Arena: http://{args.host}:{args.port}/   (Mafia games from {games_dir('mafia')})",
           flush=True)
