@@ -86,11 +86,6 @@ function stats(g) {
 // ---------- home ----------
 
 function renderCards() {
-  const all = Object.values(games);
-  const sum = (f) => all.reduce((n, g) => n + f(g), 0);
-  const num = (n) => h('b', { text: String(n) });
-  $('tally').replaceChildren(num(all.length), ' courts · ', num(sum((g) => g.runs)), ' games played · ',
-    num(sum((g) => g.live)), ' live now');
   $('cards').replaceChildren(...Object.entries(games).map(([key, g]) => {
     const court = COURT[key] ?? { rank: '?', suit: '◆', emblem: 'crown' };
     const pip = (where) => h('span', { class: 'pip ' + where, 'aria-hidden': 'true' },
@@ -99,11 +94,9 @@ function renderCards() {
     medal.innerHTML = svg(court.emblem);   // static markup from EMBLEMS
     return h('a', { class: 'card', href: '#' + key, 'data-game': key },
       pip('tl'), pip('br'),
-      g.live ? h('span', { class: 'live-tag', text: `${g.live} live` }) : null,
       medal,
       h('h2', { text: g.title }),
       h('p', { class: 'desc', text: g.description }),
-      h('dl', { class: 'stats' }, stats(g)),
       h('span', { class: 'enter', text: 'Enter the court' }));
   }));
 }

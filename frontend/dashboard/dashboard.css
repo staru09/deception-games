@@ -77,16 +77,14 @@ p { margin: 0; }
 .flourish { display: flex; align-items: center; gap: 12px; width: min(420px, 80vw); color: var(--gold); font-size: 11px; }
 .flourish::before, .flourish::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
 .flourish::after { transform: scaleX(-1); }
-.tally { font: 600 12.5px var(--body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
-.tally b { color: var(--gold); font: 700 15px var(--head); letter-spacing: 0.04em; }
 
 /* ---------- court cards ---------- */
 .cards { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); }
 .card {
   --accent: var(--gold);
   position: relative; isolation: isolate;
-  display: grid; justify-items: center; align-content: start; gap: 12px;
-  min-height: 420px; padding: 46px 24px 64px; text-align: center;   /* the bottom clears the corner pip */
+  display: flex; flex-direction: column; align-items: center; gap: 12px;   /* the button sits at the bottom */
+  min-height: 380px; padding: 46px 24px 64px; text-align: center;   /* the bottom clears the corner pip */
   color: inherit; text-decoration: none;
   background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%), var(--card);
   border: 1px solid var(--gold-line); border-radius: 18px;
@@ -122,24 +120,16 @@ p { margin: 0; }
 }
 .card h2 { font: 700 21px/1.2 var(--head); letter-spacing: 0.05em; color: var(--gold); }
 .card .desc { color: var(--muted); font-size: 13.5px; max-width: 30ch; }
-.card .stats { justify-content: center; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--gold-line); width: 100%; }
-.card .stats dd { color: var(--text); }
 .enter {
-  margin-top: 6px; padding: 7px 16px; border: 1px solid var(--gold); border-radius: 999px;
+  margin-top: auto; padding: 7px 16px; border: 1px solid var(--gold); border-radius: 999px;
   font: 600 11.5px var(--body); letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
   transition: background 0.2s, color 0.2s;
 }
 .card:hover .enter, .card:focus-visible .enter { background: var(--gold); color: var(--ink-on-gold); }
-.live-tag {
-  position: absolute; top: 18px; right: 18px; padding: 2px 10px; border-radius: 999px;
-  font: 700 11px var(--body); letter-spacing: 0.1em; text-transform: uppercase;
-  color: #fff; background: var(--bad); box-shadow: 0 0 0 0 var(--bad); animation: pulse 2s infinite;
-}
 @keyframes pulse { 70% { box-shadow: 0 0 0 8px transparent; } }
 @media (prefers-reduced-motion: reduce) {
   .card, .enter { transition: none; }
   .card:hover, .card:focus-visible { transform: none; }
-  .live-tag { animation: none; }
 }
 @media (max-width: 560px) {
   .cards { gap: 16px; }
