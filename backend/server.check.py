@@ -354,6 +354,10 @@ def check_pages():
     status, _, headers = request("GET", "/misinformation?game=0002")
     check(status == 301 and headers["Location"] == "/misinformation/?game=0002", "/misinformation redirects to /misinformation/")
     check(not (BACKEND_DIR.parent / "frontend" / "misinformation").exists(), "no copied misinformation page")
+    check(request("GET", "/mafia/assets/characters/Knight.glb")[2]["Cache-Control"] == "max-age=86400",
+          "the 3D models and textures are cached for a day")
+    for path in ["/mafia/assets/no-such.glb", "/mafia/main.js", "/senate/games/0001/config.json", "/api/games"]:
+        check(request("GET", path)[2]["Cache-Control"] == "no-store", f"GET {path} is never cached")
     for path in ["/../backend/server.py", "/misinformation/../../backend/server.py", "/mafia/..%2f..%2fbackend/server.py"]:
         check(request("GET", path)[0] == 404, f"GET {path} can't leave frontend/ (backend/server.py exists)")
     # Files that do exist one level above every data dir: the server's log, and one planted here.

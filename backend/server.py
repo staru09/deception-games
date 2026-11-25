@@ -474,8 +474,18 @@ class Handler(SimpleHTTPRequestHandler):
             self.directory = str(FRONTEND_DIR)
         return super().translate_path(path)
 
+    sent_status = None
+
+    def send_response(self, code, message=None):
+        self.sent_status = code
+        super().send_response(code, message)
+
     def end_headers(self):
-        self.send_header("Cache-Control", "no-store")  # live games grow while being watched
+        # The 3D models and textures (/<page>/assets/...) stay in the browser for a day, so a second
+        # viewer tab doesn't download them again. Everything else is fetched fresh: live games grow
+        # while being watched, and the code changes while we work on it.
+        cached = self.sent_status in (200, 304) and urlsplit(self.path).path.split("/")[2:3] == ["assets"]
+        self.send_header("Cache-Control", "max-age=86400" if cached else "no-store")
         # the data dirs hold model-written text, served from the origin that may start runs
         self.send_header("X-Content-Type-Options", "nosniff")
         super().end_headers()  # and no CORS header, ever: other sites must not read or post
